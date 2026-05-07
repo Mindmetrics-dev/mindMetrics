@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Secretos (MindMetrics Security)
+.env
+
+# Docker
+.docker/
+
+# Windows metadata
+*:Zone.Identifier
