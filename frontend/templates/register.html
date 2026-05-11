@@ -1,0 +1,92 @@
+{% extends 'mindmetrics/auth_base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/register.html -->
+
+{% block title %}Crear cuenta - MindMetrics{% endblock %}
+
+{% block auth_brand %}{% endblock %}
+
+{% block auth_content %}
+    <h1 class="auth-card__title">Crear cuenta</h1>
+    <p class="auth-card__subtitle">Regístrate para comenzar tu seguimiento emocional</p>
+
+    <form method="post" action="{% url 'register' %}" novalidate data-register-form>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-group__error" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_full_name" class="form-group__label">Nombre Completo</label>
+            <input type="text"
+                   id="id_full_name"
+                   name="full_name"
+                   class="form-group__input"
+                   placeholder="Nombre Completo"
+                   value="{{ form.full_name.value|default_if_none:'' }}"
+                   autocomplete="name"
+                   required>
+            {% if form.full_name.errors %}
+                <span class="form-group__error">{{ form.full_name.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_email" class="form-group__label">Correo electrónico</label>
+            <input type="email"
+                   id="id_email"
+                   name="email"
+                   class="form-group__input"
+                   placeholder="Correo electrónico"
+                   value="{{ form.email.value|default_if_none:'' }}"
+                   autocomplete="email"
+                   required>
+            {% if form.email.errors %}
+                <span class="form-group__error">{{ form.email.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_password" class="form-group__label">Contraseña</label>
+            <input type="password"
+                   id="id_password"
+                   name="password"
+                   class="form-group__input"
+                   placeholder="Contraseña"
+                   autocomplete="new-password"
+                   minlength="8"
+                   required>
+            {% if form.password.errors %}
+                <span class="form-group__error">{{ form.password.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_password_confirm" class="form-group__label">Confirmar contraseña</label>
+            <input type="password"
+                   id="id_password_confirm"
+                   name="password_confirm"
+                   class="form-group__input"
+                   placeholder="Confirmar contraseña"
+                   autocomplete="new-password"
+                   minlength="8"
+                   required>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top: var(--space-4);">
+            <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon">
+            Regístrate
+        </button>
+    </form>
+{% endblock %}
+
+{% block auth_footer %}
+    <p class="auth-card__footer" style="color: var(--color-text); margin-top: var(--space-6);">
+        Ya tengo cuenta.
+        <a href="{% url 'login' %}" class="auth-card__footer-link">Inicia Sesión</a>
+    </p>
+{% endblock %}

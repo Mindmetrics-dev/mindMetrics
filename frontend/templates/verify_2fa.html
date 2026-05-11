@@ -1,0 +1,51 @@
+{% extends 'mindmetrics/auth_base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/Templates/verify_2fa.html -->
+
+{% block title %}Verificación en 2 pasos - MindMetrics{% endblock %}
+
+{% block auth_brand %}{% endblock %}
+
+{% block auth_content %}
+    <h1 class="auth-card__title">Verificación en 2 pasos</h1>
+    <p class="auth-card__subtitle">
+        Ingresa el código de 6 dígitos enviado a
+        {% if email_destino %}<strong>{{ email_destino }}</strong>{% else %}tu correo{% endif %}
+    </p>
+
+    <form method="post" action="{% url 'verify_2fa' %}" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-group__error" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="otp" role="group" aria-label="Código de verificación de 6 dígitos">
+            {% for i in "123456" %}
+                <input type="text"
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       maxlength="1"
+                       class="otp__input"
+                       data-otp-input
+                       aria-label="Dígito {{ forloop.counter }}"
+                       autocomplete="one-time-code"
+                       required>
+            {% endfor %}
+        </div>
+
+        <input type="hidden" name="otp_code" data-otp-hidden value="">
+
+        <button type="submit" class="btn btn--primary btn--block">
+            <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon">
+            Verificar Código
+        </button>
+
+        <div style="text-align: center; margin-top: var(--space-4);">
+            <a href="{% url 'resend_2fa' %}" class="btn btn--ghost">Reenviar código</a>
+        </div>
+    </form>
+{% endblock %}

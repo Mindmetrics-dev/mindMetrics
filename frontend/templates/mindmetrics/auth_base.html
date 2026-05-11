@@ -1,0 +1,37 @@
+{% load static %}
+<!-- Ruta: Frontend/templates/auth_base.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MindMetrics - Acceso{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="auth-shell">
+
+    <div class="auth-card">
+        {% block auth_brand %}
+        <div class="auth-card__brand">
+            <img src="{% static 'img/logo-mindmetrics.png' %}"
+                 alt="MindMetrics"
+                 width="220" height="48">
+        </div>
+        {% endblock %}
+
+        {% block auth_content %}{% endblock %}
+    </div>
+
+    {% block auth_footer %}{% endblock %}
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

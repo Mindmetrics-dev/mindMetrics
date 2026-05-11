@@ -1,0 +1,53 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/recursos.html -->
+
+{% block title %}Recursos - MindMetrics{% endblock %}
+
+{% block content %}
+    <h1 class="sr-only">Recursos de bienestar</h1>
+
+    {% if recursos %}
+        <section class="grid grid--resources-4" aria-label="Listado de recursos">
+            {% for recurso in recursos %}
+                <article class="resource-card">
+                    <h2 class="resource-card__title">{{ recurso.titulo }}</h2>
+
+                    <p class="resource-card__desc">
+                        <strong>Descripción:</strong> {{ recurso.descripcion }}
+                    </p>
+
+                    <p class="resource-card__benefit">
+                        <strong>Beneficio:</strong> {{ recurso.beneficio }}
+                    </p>
+
+                    <a href="{{ recurso.url }}"
+                       class="resource-card__link"
+                       {% if recurso.externo %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                        Enlace
+                    </a>
+                </article>
+            {% endfor %}
+        </section>
+    {% else %}
+        <p style="text-align: center; color: var(--color-text); padding: var(--space-12);">
+            Aún no hay recursos disponibles. Vuelve más tarde.
+        </p>
+    {% endif %}
+
+    {% if is_paginated %}
+        <nav class="pagination" aria-label="Paginación de recursos"
+             style="display: flex; justify-content: center; gap: var(--space-3); margin-top: var(--space-8);">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn--ghost">&laquo; Anterior</a>
+            {% endif %}
+            <span style="align-self: center; color: var(--color-text);">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn--ghost">Siguiente &raquo;</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MindMetrics{% endblock %}</title>
+
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="app-shell">
+
+    <!-- ════════════════════════════════════════════
+         NAVBAR  —  nomenclatura: navbar-*  (flat)
+         ════════════════════════════════════════════ -->
+    <header class="navbar" role="banner">
+        <div class="navbar-inner">
+
+            <!-- LOGO -->
+            <a href="{% url 'inicio' %}" class="navbar-logo" aria-label="Ir al inicio de MindMetrics">
+                <img src="{% static 'img/logo_color.png' %}"
+                     alt="Icono MindMetrics"
+                     class="navbar-logo-img">
+                <span class="navbar-logo-text">
+                    Mind<span class="navbar-logo-accent">Metrics</span>
+                </span>
+            </a>
+
+            <!-- TOGGLE (móvil) -->
+            <button type="button"
+                    class="navbar-toggle"
+                    data-navbar-toggle
+                    aria-label="Abrir menú de navegación"
+                    aria-expanded="false"
+                    aria-controls="navbar-menu">
+                <span class="navbar-toggle-bar"></span>
+                <span class="navbar-toggle-bar"></span>
+                <span class="navbar-toggle-bar"></span>
+            </button>
+
+            <!-- LINKS DE NAVEGACIÓN -->
+            <nav id="navbar-menu" aria-label="Navegación principal">
+                <ul class="navbar-nav" data-navbar-nav>
+                    <li>
+                        <a href="{% url 'inicio' %}"
+                           class="navbar-link{% if active_section == 'inicio' %} is-active{% endif %}">
+                            Inicio
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'registro_diario' %}"
+                           class="navbar-link{% if active_section == 'registro' %} is-active{% endif %}">
+                            Registro
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'calendario' %}"
+                           class="navbar-link{% if active_section == 'calendario' %} is-active{% endif %}">
+                            Calendario
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'historial' %}"
+                           class="navbar-link{% if active_section == 'historial' %} is-active{% endif %}">
+                            Historial
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'recursos' %}"
+                           class="navbar-link{% if active_section == 'recursos' %} is-active{% endif %}">
+                            Recursos
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- BOTÓN SALIR -->
+            <form method="post" action="{% url 'logout' %}" class="navbar-exit-form">
+                {% csrf_token %}
+                <button type="submit" class="navbar-exit" aria-label="Cerrar sesión">
+                    Salir
+                </button>
+            </form>
+
+        </div>
+    </header>
+    <!-- /NAVBAR -->
+
+    <main class="app-shell__main" role="main">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

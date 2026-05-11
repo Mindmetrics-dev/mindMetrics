@@ -1,0 +1,59 @@
+{% extends 'mindmetrics/auth_base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/login.html -->
+
+{% block title %}Inicia Sesión - MindMetrics{% endblock %}
+
+{% block auth_content %}
+    <form method="post" action="{% url 'login' %}" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-group__error" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_email" class="form-group__label sr-only">Email</label>
+            <input type="email"
+                   id="id_email"
+                   name="email"
+                   class="form-group__input"
+                   placeholder="Email"
+                   value="{{ form.email.value|default_if_none:'' }}"
+                   autocomplete="email"
+                   required>
+            {% if form.email.errors %}
+                <span class="form-group__error">{{ form.email.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_password" class="form-group__label sr-only">Contraseña</label>
+            <input type="password"
+                   id="id_password"
+                   name="password"
+                   class="form-group__input"
+                   placeholder="Contraseña"
+                   autocomplete="current-password"
+                   required>
+            {% if form.password.errors %}
+                <span class="form-group__error">{{ form.password.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--block">
+            <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon">
+            Inicia Sesión
+        </button>
+    </form>
+{% endblock %}
+
+{% block auth_footer %}
+    <p class="auth-card__footer" style="color: var(--color-text); margin-top: var(--space-6);">
+        ¿No tienes cuenta?
+        <a href="{% url 'register' %}" class="auth-card__footer-link">Regístrate aquí</a>
+    </p>
+{% endblock %}

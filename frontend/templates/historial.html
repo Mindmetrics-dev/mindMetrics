@@ -1,0 +1,46 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/historial.html -->
+
+{% block title %}Historial - MindMetrics{% endblock %}
+
+{% block content %}
+    <h1 class="sr-only">Historial de métricas conductuales</h1>
+
+    {% if metricas %}
+        {# --- Cuando el modelo de datos esté listo, sustituir este bloque --- #}
+        <section class="grid grid--metrics-3" style="margin-bottom: var(--space-8);">
+            {% for metrica in metricas.resumen %}
+                <article class="metric-card">
+                    <h2 class="metric-card__label">{{ metrica.label }}</h2>
+                    <p class="metric-card__value metric-card__value--{{ metrica.severity|default:'success' }}">
+                        {{ metrica.valor }}
+                    </p>
+                    <p class="metric-card__hint">{{ metrica.hint }}</p>
+                </article>
+            {% endfor %}
+        </section>
+
+        <section>
+            <p class="section-label">Evolución histórica</p>
+            <div class="chart-block">
+                <canvas id="canvasHistorial"
+                        data-puntos="{{ metricas.serie|safe }}"></canvas>
+            </div>
+        </section>
+    {% else %}
+        <div class="historial-placeholder">
+            <p class="historial-placeholder__text">
+                que metriscas<br>colocaremos aqui
+            </p>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    {% if metricas %}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{% static 'js/dashboard-chart.js' %}"></script>
+    {% endif %}
+{% endblock %}

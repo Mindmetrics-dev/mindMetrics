@@ -1,0 +1,213 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/perfil_inicial.html -->
+
+{% block title %}Perfil inicial - MindMetrics{% endblock %}
+
+{% block content %}
+    <div class="form-card" role="form" aria-labelledby="perfilTitulo">
+        <div class="form-card__brand">
+            <img src="{% static 'img/logo-mindmetrics.png' %}"
+                 alt="MindMetrics"
+                 width="220">
+        </div>
+
+        <h1 id="perfilTitulo" class="sr-only">Cuestionario de perfil inicial (anamnesis)</h1>
+
+        <form method="post" action="{% url 'perfil_inicial' %}" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-group__error" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {# --- Bloque 1: Datos demográficos --- #}
+            <div class="form-group">
+                <label for="id_fecha_nacimiento" class="form-group__label">¿Cuál es tu fecha de nacimiento?</label>
+                <input type="date" id="id_fecha_nacimiento" name="fecha_nacimiento"
+                       class="form-group__input"
+                       value="{{ form.fecha_nacimiento.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_genero" class="form-group__label">¿Cómo te identificas en términos de género?</label>
+                <select id="id_genero" name="genero" class="form-group__input" required>
+                    <option value="" disabled {% if not form.genero.value %}selected{% endif %}>Escribe...</option>
+                    {% for value, label in genero_choices %}
+                        <option value="{{ value }}" {% if form.genero.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_estado_relacion" class="form-group__label">¿Cuál es tu estado de relación actual?</label>
+                <select id="id_estado_relacion" name="estado_relacion" class="form-group__input" required>
+                    <option value="" disabled {% if not form.estado_relacion.value %}selected{% endif %}>Escribe...</option>
+                    {% for value, label in relacion_choices %}
+                        <option value="{{ value }}" {% if form.estado_relacion.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_situacion_laboral" class="form-group__label">¿Cuál es tu situación laboral actual?</label>
+                <select id="id_situacion_laboral" name="situacion_laboral" class="form-group__input" required>
+                    <option value="" disabled {% if not form.situacion_laboral.value %}selected{% endif %}>Escribe...</option>
+                    {% for value, label in laboral_choices %}
+                        <option value="{{ value }}" {% if form.situacion_laboral.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# --- Bloque 2: Hábitos basales --- #}
+            <div class="form-group">
+                <label for="id_horas_sueno_promedio" class="form-group__label">¿Cuántas horas duermes en promedio al día?</label>
+                <input type="number" step="0.5" min="0" max="24"
+                       id="id_horas_sueno_promedio" name="horas_sueno_promedio"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_sueno_promedio.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_horas_trabajo_promedio" class="form-group__label">¿Cuántas horas trabajas o estudias en promedio al día?</label>
+                <input type="number" step="0.5" min="0" max="24"
+                       id="id_horas_trabajo_promedio" name="horas_trabajo_promedio"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_trabajo_promedio.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_horas_pantallas_promedio" class="form-group__label">¿Cuántas horas pasas frente a pantallas al día, incluyendo trabajo, estudio y ocio?</label>
+                <input type="number" step="0.5" min="0" max="24"
+                       id="id_horas_pantallas_promedio" name="horas_pantallas_promedio"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_pantallas_promedio.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_horas_actividad_fisica_semana" class="form-group__label">¿Cuántas horas de actividad física realizas a la semana?</label>
+                <input type="number" step="0.5" min="0" max="168"
+                       id="id_horas_actividad_fisica_semana" name="horas_actividad_fisica_semana"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_actividad_fisica_semana.value|default_if_none:'' }}" required>
+            </div>
+
+            {# --- Bloque 3: Niveles de estrés (1-10) --- #}
+            <p class="form-card__scale-hint">En una escala de 1 a 10, donde 1 es nada de estrés y 10 es estrés extremo:</p>
+
+            <div class="form-group">
+                <label for="id_estres_laboral_basal" class="form-group__label">¿Qué nivel de estrés laboral experimentas?</label>
+                <input type="number" min="1" max="10"
+                       id="id_estres_laboral_basal" name="estres_laboral_basal"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.estres_laboral_basal.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_estres_academico_basal" class="form-group__label">¿Qué nivel de estrés académico experimentas?</label>
+                <input type="number" min="1" max="10"
+                       id="id_estres_academico_basal" name="estres_academico_basal"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.estres_academico_basal.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_estres_financiero_basal" class="form-group__label">¿Qué nivel de estrés financiero experimentas?</label>
+                <input type="number" min="1" max="10"
+                       id="id_estres_financiero_basal" name="estres_financiero_basal"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.estres_financiero_basal.value|default_if_none:'' }}" required>
+            </div>
+
+            {# --- Bloque 4: Indicadores cognitivo-emocionales --- #}
+            <div class="form-group">
+                <label for="id_dificultad_concentracion" class="form-group__label">En una escala de 1 a 10, donde 1 es ninguna dificultad y 10 es mucha dificultad, ¿Qué tan difícil te resulta concentrarte?</label>
+                <input type="number" min="1" max="10"
+                       id="id_dificultad_concentracion" name="dificultad_concentracion"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.dificultad_concentracion.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_satisfaccion_actividad" class="form-group__label">En una escala de 1 a 10, donde 1 es nada satisfecho/a y 10 es completamente satisfecho/a, ¿Qué tan satisfecho/a estás con tu actividad principal (trabajo o estudio)?</label>
+                <input type="number" min="1" max="10"
+                       id="id_satisfaccion_actividad" name="satisfaccion_actividad"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.satisfaccion_actividad.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_variabilidad_emocional" class="form-group__label">En una escala de 1 a 10, donde 1 es muy estable y 10 es muy cambiante, ¿Qué tanto varía tu estado emocional?</label>
+                <input type="number" min="1" max="10"
+                       id="id_variabilidad_emocional" name="variabilidad_emocional"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.variabilidad_emocional.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_apoyo_social" class="form-group__label">En una escala de 1 a 10, donde 1 es ningún apoyo y 10 es mucho apoyo, ¿Qué nivel de apoyo social percibes (familiares, amigos, pareja u otros)?</label>
+                <input type="number" min="1" max="10"
+                       id="id_apoyo_social" name="apoyo_social"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.apoyo_social.value|default_if_none:'' }}" required>
+            </div>
+
+            {# --- Bloque 5: Antecedentes clínicos --- #}
+            <div class="form-group">
+                <label for="id_consumo_sustancias" class="form-group__label">¿Consumes sustancias psicoactivas?</label>
+                <select id="id_consumo_sustancias" name="consumo_sustancias" class="form-group__input" required>
+                    <option value="" disabled {% if form.consumo_sustancias.value is None %}selected{% endif %}>Escribe...</option>
+                    <option value="no"     {% if form.consumo_sustancias.value == 'no' %}selected{% endif %}>No</option>
+                    <option value="ocasional" {% if form.consumo_sustancias.value == 'ocasional' %}selected{% endif %}>Ocasional</option>
+                    <option value="frecuente" {% if form.consumo_sustancias.value == 'frecuente' %}selected{% endif %}>Frecuente</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_diagnostico_previo" class="form-group__label">¿Has recibido algún diagnóstico previo en salud mental?</label>
+                <input type="text"
+                       id="id_diagnostico_previo" name="diagnostico_previo"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.diagnostico_previo.value|default_if_none:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="id_ataques_panico" class="form-group__label">¿Has tenido ataques de pánico anteriormente?</label>
+                <select id="id_ataques_panico" name="ataques_panico" class="form-group__input" required>
+                    <option value="" disabled {% if form.ataques_panico.value is None %}selected{% endif %}>Escribe...</option>
+                    <option value="no" {% if form.ataques_panico.value == 'no' %}selected{% endif %}>No</option>
+                    <option value="si" {% if form.ataques_panico.value == 'si' %}selected{% endif %}>Sí</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_antecedentes_familiares" class="form-group__label">¿Tienes antecedentes familiares de problemas de salud mental?</label>
+                <select id="id_antecedentes_familiares" name="antecedentes_familiares" class="form-group__input" required>
+                    <option value="" disabled {% if form.antecedentes_familiares.value is None %}selected{% endif %}>Escribe...</option>
+                    <option value="no" {% if form.antecedentes_familiares.value == 'no' %}selected{% endif %}>No</option>
+                    <option value="si" {% if form.antecedentes_familiares.value == 'si' %}selected{% endif %}>Sí</option>
+                    <option value="desconozco" {% if form.antecedentes_familiares.value == 'desconozco' %}selected{% endif %}>Desconozco</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_tratamiento_previo" class="form-group__label">¿Has recibido tratamiento psicológico o psiquiátrico previamente?</label>
+                <select id="id_tratamiento_previo" name="tratamiento_previo" class="form-group__input" required>
+                    <option value="" disabled {% if form.tratamiento_previo.value is None %}selected{% endif %}>Escribe...</option>
+                    <option value="no" {% if form.tratamiento_previo.value == 'no' %}selected{% endif %}>No</option>
+                    <option value="psicologico" {% if form.tratamiento_previo.value == 'psicologico' %}selected{% endif %}>Psicológico</option>
+                    <option value="psiquiatrico" {% if form.tratamiento_previo.value == 'psiquiatrico' %}selected{% endif %}>Psiquiátrico</option>
+                    <option value="ambos" {% if form.tratamiento_previo.value == 'ambos' %}selected{% endif %}>Ambos</option>
+                </select>
+            </div>
+
+            <div class="form-card__submit">
+                <button type="submit" class="btn btn--primary">
+                    <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

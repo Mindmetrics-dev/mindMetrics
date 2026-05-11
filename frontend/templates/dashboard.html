@@ -1,0 +1,84 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/dashboard.html -->
+
+{% block title %}Inicio - MindMetrics{% endblock %}
+
+{% block content %}
+    <header class="dashboard-header">
+        <div>
+            <h1 class="dashboard-header__greeting">
+                Hola, <strong>@{{ usuario.username|default:'Usuario' }}</strong>
+            </h1>
+            <p class="dashboard-header__date">
+                {{ fecha_hoy_formateada|default:'Lunes, dd de mm - semana ##' }}
+            </p>
+        </div>
+
+        <a href="{% url 'registro_diario' %}" class="btn btn--primary">
+            + Registrar Estado
+        </a>
+    </header>
+
+    <section class="grid grid--metrics-3" aria-label="Métricas del día">
+        <article class="metric-card">
+            <h2 class="metric-card__label">Estado de hoy</h2>
+            <p class="metric-card__value metric-card__value--success">
+                {{ estado_hoy.label|default:'Estable' }}
+            </p>
+            <p class="metric-card__hint">
+                {{ estado_hoy.hint|default:'Mejora vs ayer' }}
+            </p>
+        </article>
+
+        <article class="metric-card">
+            <h2 class="metric-card__label">Riesgo estimado</h2>
+            <p class="metric-card__value metric-card__value--{{ riesgo.severity|default:'warning' }}">
+                {{ riesgo.label|default:'Moderado' }}
+            </p>
+            <p class="metric-card__hint">
+                {{ riesgo.hint|default:'Estable esta semana' }}
+            </p>
+        </article>
+
+        <article class="metric-card">
+            <h2 class="metric-card__label">Racha de registros</h2>
+            <p class="metric-card__value metric-card__value--success">
+                {{ racha.dias|default:'##' }} días
+            </p>
+            <p class="metric-card__hint">
+                {{ racha.hint|default:'Récord personal' }}
+            </p>
+        </article>
+    </section>
+
+    <section class="grid grid--dashboard-main" style="margin-top: var(--space-8);">
+        <div>
+            <p class="section-label">Estado emocional - Última semana</p>
+            <div class="chart-block" id="chartEmocionalSemana">
+                {% if puntos_semana %}
+                    <canvas id="canvasEmocionalSemana"
+                            data-puntos="{{ puntos_semana|safe }}"></canvas>
+                {% else %}
+                    <span>Sin datos suficientes para graficar</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <aside class="recommendation-card" aria-label="Recomendación del día">
+            <h3 class="recommendation-card__title">Recomendación de hoy:</h3>
+            <p class="recommendation-card__body">
+                {{ recomendacion.texto|default:'Ve por un café, mereces un descanso' }}
+            </p>
+            <span class="recommendation-card__image" aria-hidden="true">&#9749;</span>
+        </aside>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+    {% if puntos_semana %}
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{% static 'js/dashboard-chart.js' %}"></script>
+    {% endif %}
+{% endblock %}
