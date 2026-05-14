@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(xargs grep -l \"recurso\")",
-      "Bash(dir \"C:\\\\MindMetrics\\\\backend\\\\recursos\\\\\" /A)"
-    ]
-  }
-}
