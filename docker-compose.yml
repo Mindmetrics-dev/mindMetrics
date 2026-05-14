@@ -66,6 +66,13 @@ services:
     env_file:
       - backend/.env
 
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-preview-key-cambiar-en-produccion}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      OTP_TOTP_ISSUER: ${OTP_TOTP_ISSUER:-MindMetrics}
+      AXES_FAILURE_LIMIT: ${AXES_FAILURE_LIMIT:-5}
+      AXES_COOLOFF_MINUTES: ${AXES_COOLOFF_MINUTES:-15}
+
     volumes:
       - .:/app
       - ./logs:/app/logs

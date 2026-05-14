@@ -8,46 +8,47 @@
 {% block content %}
     <h1 class="sr-only">Recursos de bienestar</h1>
 
-    {% if recursos %}
-        <section class="grid grid--resources-4" aria-label="Listado de recursos">
-            {% for recurso in recursos %}
-                <article class="resource-card">
-                    <h2 class="resource-card__title">{{ recurso.titulo }}</h2>
+    <section class="grid grid--recursos-3x3" aria-label="Recursos y líneas de atención">
+        <!-- Columnas 0-1: Recursos -->
+        {% for recurso in recursos %}
+            <article class="resource-card">
+                <span class="resource-card__icon">{{ recurso.icono }}</span>
+                <h3 class="resource-card__title">{{ recurso.titulo }}</h3>
 
-                    <p class="resource-card__desc">
-                        <strong>Descripción:</strong> {{ recurso.descripcion }}
-                    </p>
+                <p class="resource-card__desc">{{ recurso.descripcion }}</p>
 
-                    <p class="resource-card__benefit">
-                        <strong>Beneficio:</strong> {{ recurso.beneficio }}
-                    </p>
+                <p class="resource-card__benefit">
+                    <strong>Beneficio:</strong> {{ recurso.beneficio }}
+                </p>
 
-                    <a href="{{ recurso.url }}"
-                       class="resource-card__link"
-                       {% if recurso.externo %}target="_blank" rel="noopener noreferrer"{% endif %}>
-                        Enlace
-                    </a>
-                </article>
-            {% endfor %}
-        </section>
-    {% else %}
-        <p style="text-align: center; color: var(--color-text); padding: var(--space-12);">
-            Aún no hay recursos disponibles. Vuelve más tarde.
-        </p>
-    {% endif %}
+                <a href="{{ recurso.url }}"
+                   class="btn btn--primary btn--sm resource-card__btn"
+                   {% if recurso.externo %}target="_blank" rel="noopener noreferrer"{% endif %}>
+                    Descargar PDF
+                </a>
+            </article>
+        {% endfor %}
 
-    {% if is_paginated %}
-        <nav class="pagination" aria-label="Paginación de recursos"
-             style="display: flex; justify-content: center; gap: var(--space-3); margin-top: var(--space-8);">
-            {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn--ghost">&laquo; Anterior</a>
-            {% endif %}
-            <span style="align-self: center; color: var(--color-text);">
-                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            </span>
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="btn btn--ghost">Siguiente &raquo;</a>
-            {% endif %}
-        </nav>
-    {% endif %}
+        <!-- Columna 2: Líneas de atención -->
+        {% if lineas_atencion %}
+            <aside class="lineas-atencion" aria-label="Líneas de atención">
+                <h2 class="lineas-atencion__title">
+                    <svg class="lineas-atencion__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                    Líneas de atención
+                </h2>
+                {% for linea in lineas_atencion %}
+                    <div class="linea-card">
+                        <h3 class="linea-card__nombre">{{ linea.nombre }}</h3>
+                        <p class="linea-card__telefono">{{ linea.telefono }}</p>
+                        <p class="linea-card__desc">{{ linea.descripcion }}</p>
+                        {% if linea.horario %}
+                            <p class="linea-card__horario">{{ linea.horario }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </aside>
+        {% endif %}
+    </section>
 {% endblock %}

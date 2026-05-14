@@ -13,10 +13,12 @@ DECISIÓN ARQUITECTÓNICA: managed = False en TODAS las tablas.
   - Índices declarados en Meta.indexes sirven como documentación
     y para introspección del admin; no son emitidos en migraciones.
 
-IMPORTANTE: los campos TEXT que en el CSV contienen valores
-  numéricos (cambio_emocional, apoyo_percibido, etc.) se
-  almacenan como texto plano sin choices en el ORM para evitar
-  conflictos con los datos reales del dataset (enteros 1-10).
+Tipos de campo alineados con agente/mapper.py:
+  - uso_sustancias, diagnostico_previo: BooleanField (BOOLEAN en DDL).
+  - cambio_emocional: IntegerField (INTEGER en DDL). El mapper llama
+    _map_escala(val, 4, 7) que requiere int, no string.
+  - tratamiento_previo, dificultad_concentra, apoyo_percibido: TextField
+    con valores de texto descriptivo que coinciden con _map_texto_tristate.
 """
 
 from django.db import models
@@ -176,19 +178,32 @@ class EvaluacionInicial(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)],
     )
 
-    # ── Campos TEXT que contienen valores numéricos 0–10 ────────────────────
-    # No se definen choices aquí porque los valores reales son cadenas numéricas
-    # ("1" a "10") provenientes del dataset. Si en el futuro se codifican como
-    # texto descriptivo, se pueden agregar choices sin cambiar la columna SQL.
-    uso_sustancias       = models.TextField(null=True, blank=True)
+    # ── Campos booleanos clínicos ────────────────────────────────────────────
+    # uso_sustancias: True=consume, False/None=no consume
+    #   mapper._map_uso_sustancias: if val is None or val is False → 0.2
+    uso_sustancias = models.BooleanField(null=True, blank=True)
+
+    # diagnostico_previo: True=con diagnóstico, False/None=sin diagnóstico
+    #   mapper._map_diagnostico_previo: if val is None or val is False → 0.2
+    diagnostico_previo = models.BooleanField(null=True, blank=True)
+
+    # ── Campo numérico escala 1-10 ───────────────────────────────────────────
+    # cambio_emocional: INTEGER en DDL — mapper._map_escala() espera int/float
+    cambio_emocional = models.IntegerField(
+        null=True, blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
+
+    # ── Campos TEXT con dominio descriptivo ──────────────────────────────────
+    # dificultad_concentra: 'ninguno' | 'ocasional' | 'frecuente'
     dificultad_concentra = models.TextField(
         null=True, blank=True,
-        db_column='dificultad_concentra',   # CSV: dificultad_concentracion
+        db_column='dificultad_concentra',
         verbose_name='Dificultad de concentración',
     )
-    cambio_emocional   = models.TextField(null=True, blank=True)
-    diagnostico_previo = models.TextField(null=True, blank=True)
+    # tratamiento_previo: 'ninguno' | 'adherente' | 'abandono'
     tratamiento_previo = models.TextField(null=True, blank=True)
+    # apoyo_percibido: 'excelente'|'alto'|'moderado'|'intermitente'|'poco'|'nulo'
     apoyo_percibido    = models.TextField(null=True, blank=True)
 
     # ── Antecedentes booleanos ───────────────────────────────────────────────

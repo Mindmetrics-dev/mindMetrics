@@ -57,19 +57,33 @@
                 {% endfor %}
 
                 {% for dia in dias_calendario %}
-                    <a href="{% if dia.url %}{{ dia.url }}{% else %}#{% endif %}"
-                       class="calendar__cell
-                              {% if dia.es_otro_mes %}calendar__cell--muted{% endif %}
-                              {% if dia.es_hoy %}calendar__cell--today{% endif %}"
-                       role="gridcell"
-                       aria-label="{{ dia.aria_label }}">
-                        {{ dia.numero }}
-                    </a>
+                    <div class="calendar__cell
+                                calendar__cell--{{ dia.estado_clase }}
+                                {% if dia.es_otro_mes %}calendar__cell--muted{% endif %}
+                                {% if dia.es_hoy %}calendar__cell--today{% endif %}"
+                         role="gridcell"
+                         aria-label="{{ dia.aria_label }}">
+                        <span class="calendar__cell-number">{{ dia.numero }}</span>
+                        {% if dia.estado_label %}
+                            <span class="calendar__cell-state">{{ dia.estado_label }}</span>
+                        {% elif not dia.es_otro_mes %}
+                            <span class="calendar__cell-state calendar__cell-state--empty">Sin encuesta</span>
+                        {% endif %}
+                    </div>
                 {% endfor %}
             </div>
         </section>
 
         <aside class="calendar-sidebar">
+            <div class="calendar-legend" aria-label="Leyenda del calendario">
+                {% for item in leyenda %}
+                    <div class="calendar-legend__item">
+                        <span class="calendar-legend__dot calendar-legend__dot--{{ item.clase }}"></span>
+                        <span>{{ item.label }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
             <div class="activities-card">
                 <h2 class="activities-card__title">Mis actividades</h2>
                 {% if mis_actividades %}
@@ -85,10 +99,10 @@
                 {% endif %}
             </div>
 
-            <div class="recommendation-card" aria-label="Recomendación del día">
-                <h3 class="recommendation-card__title">Recomendación de hoy:</h3>
+            <div class="recommendation-card" aria-label="Recomendacion del dia">
+                <h3 class="recommendation-card__title">Recomendacion de hoy:</h3>
                 <p class="recommendation-card__body">
-                    {{ recomendacion.texto|default:'Ve por un café, mereces un descanso' }}
+                    {{ recomendacion.texto|default:'Ve por un cafe, mereces un descanso' }}
                 </p>
                 <span class="recommendation-card__image" aria-hidden="true">&#9749;</span>
             </div>

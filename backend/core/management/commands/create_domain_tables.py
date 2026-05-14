@@ -29,7 +29,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 
 # Ruta por defecto relativa a la raíz del proyecto (MindMetrics/)
-DEFAULT_SQL = Path(__file__).resolve().parents[4] / 'PostgreSQL' / '02_create_tables.sql'
+DEFAULT_SQL = Path(__file__).resolve().parents[4] / 'postgreSQL' / '02_create_tables.sql'
 
 DOMAIN_TABLES = [
     'usuario',

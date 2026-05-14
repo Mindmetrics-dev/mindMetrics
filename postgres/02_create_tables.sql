@@ -34,28 +34,44 @@ CREATE TABLE IF NOT EXISTS tipo_recurso (
 -- ────────────────────────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS evaluacion_inicial (
-    id_eval               SERIAL PRIMARY KEY,
-    id_usuario            INTEGER NOT NULL REFERENCES usuario(id_usuario) ON DELETE CASCADE,
-    edad                  INTEGER,
-    genero                VARCHAR(20),
-    estado_relacion       VARCHAR(50),
-    situacion_trabajo     VARCHAR(100),
-    hr_sueno              FLOAT,
-    hr_trabajo            FLOAT,
-    hr_pantalla           FLOAT,
-    hr_act_fis            FLOAT,
-    estres_laboral        INTEGER,
-    estres_academico      INTEGER,
-    estres_financ         INTEGER,
-    uso_sustancias        TEXT,
-    dificultad_concentra  TEXT,
-    satisfaccion_laboral  INTEGER,
-    cambio_emocional      TEXT,
-    diagnostico_previo    TEXT,
-    historial_panico      BOOLEAN,
-    historial_familiar    BOOLEAN,
-    tratamiento_previo    TEXT,
-    apoyo_percibido       TEXT
+    id_eval              SERIAL PRIMARY KEY,
+        id_usuario           INTEGER NOT NULL,
+
+        -- Datos sociodemograficos
+        edad                 INTEGER,
+        genero               VARCHAR(20),
+        estado_relacion      VARCHAR(50),
+        situacion_trabajo    VARCHAR(100),
+
+        -- Habitos de vida (horas)
+        hr_sueno             FLOAT,
+        hr_trabajo           FLOAT,
+        hr_pantalla          FLOAT,
+        hr_act_fis           FLOAT,
+
+        -- Niveles de estres y satisfaccion (escala 1-10)
+        estres_laboral       INTEGER,
+        estres_academico     INTEGER,
+        estres_financ        INTEGER,
+        satisfaccion_laboral INTEGER,
+
+        -- Campos compatibles con agente/mapper.py
+        -- uso_sustancias: BOOLEAN (True=consume, False/NULL=no consume)
+        -- cambio_emocional: INTEGER 1-10 (mapper._map_escala espera int)
+        -- diagnostico_previo: BOOLEAN (True=con diagnóstico, False/NULL=sin)
+        -- tratamiento_previo: TEXT con valores 'ninguno'|'adherente'|'abandono'
+        -- dificultad_concentra: TEXT con valores 'ninguno'|'ocasional'|'frecuente'
+        -- apoyo_percibido: TEXT con valores del SITUACION_APOYO_RECIBIDO
+        uso_sustancias       BOOLEAN,
+        dificultad_concentra TEXT,
+        cambio_emocional     INTEGER,
+        diagnostico_previo   BOOLEAN,
+        tratamiento_previo   TEXT,
+        apoyo_percibido      TEXT,
+
+        -- Antecedentes booleanos
+        historial_panico     BOOLEAN,
+        historial_familiar   BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS registro_emocional (

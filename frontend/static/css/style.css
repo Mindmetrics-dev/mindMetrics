@@ -69,7 +69,7 @@ select {
     /* Surfaces */
     --color-bg-app: #A8C4C2;
     --color-bg-navbar: #F5F4EE;
-    --color-bg-auth: #CFD8D2;
+    --color-bg-auth: #8ab8bb;
     --color-card-white: #FFFFFF;
     --color-card-light: #E8EDEC;
 
@@ -341,16 +341,18 @@ select {
 .auth-shell {
     min-height: 100vh;
     background-color: var(--color-bg-auth);
-    background-image: url("../img/auth-backdrop.jpg");
-    background-size: cover;
+    background-image: url("../img/FondoRegistro.png");
+    background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+    background-attachment: fixed;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: var(--space-8) var(--space-4);
     position: relative;
+    
 }
 
 .auth-card {
@@ -366,6 +368,20 @@ select {
     display: flex;
     justify-content: center;
     margin-bottom: var(--space-8);
+}
+
+.auth-card__brand-title {
+    font-size: var(--fs-4xl);       /* Un tamaño grande (2.25rem) */
+    font-weight: 900;               /* Extra negrita para darle peso */
+    color: var(--color-primary-dark);
+    text-align: center;
+    letter-spacing: -0.03em;        /* Letras ligeramente juntas (look tech) */
+    margin-bottom: var(--space-8);
+    line-height: 1;
+}
+.auth-card__brand-title span {
+    color: var(--color-primary);
+    font-weight: 400;               /* Más delgado para crear contraste visual */
 }
 
 .auth-card__title {
@@ -386,6 +402,53 @@ select {
     text-align: center;
     font-size: var(--fs-sm);
     color: var(--color-text);
+}
+
+/* -----------------------------
+   7b. CONSENT BODY (consentimiento informado)
+------------------------------ */
+.consent-body {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-top: var(--space-4);
+    font-size: var(--fs-xs);
+    line-height: 1.7;
+    color: var(--color-text);
+    background-color: var(--color-bg, #fafafa);
+}
+
+.consent-body h3 {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+    color: var(--color-text);
+}
+
+.consent-body h4 {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-1);
+    color: var(--color-primary-dark, #4338ca);
+}
+
+.consent-body ul {
+    padding-left: var(--space-5);
+    margin: var(--space-2) 0;
+}
+
+.consent-body li {
+    margin-bottom: var(--space-1);
+}
+
+.consent-body .consent-meta {
+    font-size: var(--fs-xs);
+    color: #6b7280;
+    font-style: italic;
+    margin-bottom: var(--space-3);
 }
 
 .auth-card__footer-link {
@@ -508,6 +571,16 @@ select {
     border-radius: var(--radius-md);
     color: var(--color-text);
 }
+.otp__input--single {
+    width: 300px;
+    text-align: center;
+    letter-spacing: 1.0em; /* Esto separa los números simulando recuadros */
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: 1.5rem;
+    padding: 10px;
+}
 
 .otp__input:focus {
     outline: none;
@@ -588,6 +661,12 @@ select {
     flex-direction: column;
     gap: var(--space-3);
     text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resource-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
 }
 
 .resource-card__title {
@@ -609,6 +688,92 @@ select {
 }
 
 /* -----------------------------
+   11b. RESOURCE CARD ENHANCEMENTS
+------------------------------ */
+.resource-card__icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.resource-card__btn {
+    margin-top: auto;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--fs-sm);
+    border-radius: var(--radius-pill);
+}
+
+.btn--sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--fs-sm);
+}
+
+/* -----------------------------
+   11c. APOYO CARD (rutas de apoyo — tono diferente)
+------------------------------ */
+.apoyo-card {
+    background: linear-gradient(135deg, #F0E6F6 0%, #E8DCF0 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    text-align: center;
+    border-left: 4px solid #8B5CF6;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apoyo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.apoyo-card__icon-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+.apoyo-card__icon {
+    width: 40px;
+    height: 40px;
+    color: #7C3AED;
+}
+
+.apoyo-card__title {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: #5B21B6;
+}
+
+.apoyo-card__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+}
+
+.apoyo-card__label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: #7C3AED;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.apoyo-card__value {
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.grid--apoyo-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 700px;
+}
+
+/* -----------------------------
    12. GRID UTILITIES
 ------------------------------ */
 .grid {
@@ -622,6 +787,77 @@ select {
 
 .grid--resources-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid--recursos-3x3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+}
+
+.grid--recursos-3x3 .lineas-atencion {
+    grid-column: 3;
+    grid-row: 1 / 4;
+}
+
+/* -----------------------------
+   11d. LÍNEAS DE ATENCIÓN
+------------------------------ */
+.lineas-atencion {
+    background: linear-gradient(135deg, #EAF2F1 0%, #DCE9E8 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: inset 4px 0 0 #6E9C9C;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.lineas-atencion__title {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: #3F6E6E;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.lineas-atencion__icon {
+    width: 24px;
+    height: 24px;
+    color: #5E8B8B;
+    flex-shrink: 0;
+}
+
+.linea-card {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.linea-card__nombre {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: #3F6E6E;
+}
+
+.linea-card__telefono {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.linea-card__desc {
+    font-size: var(--fs-xs);
+    color: var(--color-text);
+}
+
+.linea-card__horario {
+    font-size: var(--fs-xs);
+    color: #5E8B8B;
+    font-weight: 500;
 }
 
 .grid--dashboard-main {
@@ -639,11 +875,21 @@ select {
     box-shadow: var(--shadow-sm);
 }
 
+.calendar--compact {
+    padding: var(--space-5);
+}
+
 .calendar__header {
     display: flex;
     align-items: center;
     gap: var(--space-4);
     margin-bottom: var(--space-5);
+}
+
+.calendar__subtitle {
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-3);
 }
 
 .calendar__day-badge {
@@ -664,6 +910,10 @@ select {
     text-align: center;
 }
 
+.calendar__grid--week {
+    align-items: stretch;
+}
+
 .calendar__day-label {
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -671,19 +921,52 @@ select {
     padding: var(--space-2);
 }
 
+.calendar__day-label--week {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .calendar__cell {
+    min-height: 88px;
     padding: var(--space-3);
     font-size: var(--fs-base);
     color: var(--color-text);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    background-color: rgba(255, 255, 255, 0.72);
 }
 
 .calendar__cell:hover { background-color: rgba(42, 142, 142, 0.08); }
 .calendar__cell--muted { color: var(--color-text-muted); }
 .calendar__cell--today { border: 2px solid var(--color-primary); font-weight: 700; }
+.calendar__cell--success { background-color: rgba(14, 149, 148, 0.12); }
+.calendar__cell--warning { background-color: rgba(217, 119, 6, 0.12); }
+.calendar__cell--danger { background-color: rgba(220, 38, 38, 0.12); }
+.calendar__cell--neutral { background-color: rgba(31, 41, 55, 0.06); }
+.calendar__cell--empty {
+    background-color: rgba(255, 255, 255, 0.72);
+    border: 1px dashed rgba(107, 114, 128, 0.35);
+}
 
+.calendar__cell-number {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+}
+
+.calendar__cell-state {
+    font-size: var(--fs-xs);
+    line-height: 1.2;
+}
+
+.calendar__cell-state--empty {
+    color: var(--color-text-muted);
+    font-style: italic;
+}
 /* -----------------------------
    14. FORM CARD (registro diario, anamnesis)
 ------------------------------ */
@@ -859,6 +1142,37 @@ select {
     gap: var(--space-6);
 }
 
+/* Calendar legend */
+.calendar-legend {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+}
+
+.calendar-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+}
+
+.calendar-legend__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.calendar-legend__dot--success { background-color: var(--color-success); }
+.calendar-legend__dot--warning { background-color: var(--color-warning); }
+.calendar-legend__dot--danger  { background-color: var(--color-danger); }
+.calendar-legend__dot--empty   { background-color: var(--color-input-border); }
+
 /* -----------------------------
    18. HISTORIAL PLACEHOLDER
 ------------------------------ */
@@ -903,6 +1217,7 @@ select {
 ------------------------------ */
 @media (max-width: 1024px) {
     .grid--resources-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid--apoyo-2 { grid-template-columns: repeat(2, 1fr); }
     .grid--metrics-3 { grid-template-columns: repeat(2, 1fr); }
     .grid--dashboard-main { grid-template-columns: 1fr; }
     .calendar-page { grid-template-columns: 1fr; }
@@ -941,6 +1256,7 @@ select {
     /* Grids generales */
     .grid--metrics-3    { grid-template-columns: 1fr; }
     .grid--resources-4  { grid-template-columns: 1fr; }
+    .grid--apoyo-2      { grid-template-columns: 1fr; }
     .auth-card          { padding: var(--space-6); }
     .otp__input         { width: 40px; height: 48px; }
 }
