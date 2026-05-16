@@ -1,0 +1,44 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+{% block title %}Resultado del Registro — MindMetrics{% endblock %}
+
+{% block content %}
+<div class="resultado-page">
+
+    <div class="resultado-card resultado-card--{{ resultado.clase }}">
+
+        <div class="resultado-icon" aria-hidden="true">
+            {% if resultado.clase == 'success' %}✅
+            {% elif resultado.clase == 'warning' %}⚠️
+            {% elif resultado.clase == 'danger' %}🔴
+            {% elif resultado.clase == 'critical' %}🚨
+            {% else %}📊
+            {% endif %}
+        </div>
+
+        <h1 class="resultado-titulo">Registro guardado</h1>
+        <p class="resultado-subtitulo">Tu estado de hoy ha sido evaluado</p>
+
+        <div class="resultado-nivel-wrap">
+            <span class="resultado-nivel-etiqueta">Nivel de riesgo</span>
+            <span class="resultado-nivel-valor resultado-nivel-valor--{{ resultado.clase }}">
+                {{ resultado.etiqueta }}
+            </span>
+        </div>
+
+        {% if resultado.alerta %}
+        <div class="resultado-alerta">
+            <strong>Atención:</strong> Tu nivel de riesgo es elevado. Te recomendamos hablar con un profesional de salud mental o una persona de confianza. No estás solo/a.
+        </div>
+        {% endif %}
+
+        <div class="resultado-acciones">
+            <a href="{% url 'historial' %}" class="btn btn--secondary">Ver mi historial</a>
+            <a href="{% url 'dashboard' %}" class="btn btn--primary">Ir al inicio</a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

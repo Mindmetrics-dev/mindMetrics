@@ -1,0 +1,114 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/calendario.html -->
+
+{% block title %}Calendario - MindMetrics{% endblock %}
+
+{% block content %}
+    <div class="calendar-page">
+        <section class="calendar" aria-label="Calendario mensual">
+            <header class="calendar__header">
+                <div class="calendar__day-badge">
+                    <span class="calendar__day-name">{{ hoy.dia_corto|default:'Thur.' }}</span>
+                    <span class="calendar__day-num">{{ hoy.numero|default:'30' }}</span>
+                </div>
+                <div>
+                    <h2 style="font-size: var(--fs-2xl); font-weight: 700; margin: 0;">
+                        {{ mes_visible.nombre|default:'April' }} {{ mes_visible.anio|default:'2026' }}
+                    </h2>
+                    <p style="font-size: var(--fs-sm); color: var(--color-text); margin: 0;">
+                        Day {{ hoy.dia_del_anio|default:'120' }}, Week {{ hoy.semana|default:'18' }}<br>
+                        Today
+                    </p>
+                </div>
+            </header>
+
+            <form method="get" action="{% url 'calendario' %}" class="calendar__controls">
+                <select name="anio" class="calendar__select" onchange="this.form.submit()">
+                    {% for anio in anios_disponibles %}
+                        <option value="{{ anio }}" {% if anio == mes_visible.anio %}selected{% endif %}>{{ anio }}</option>
+                    {% endfor %}
+                </select>
+
+                <a href="{% url 'calendario' %}?anio={{ mes_visible.anio }}&mes={{ mes_visible.mes_anterior_num }}"
+                   class="calendar__nav-btn" aria-label="Mes anterior">&lt;</a>
+
+                <select name="mes" class="calendar__select" onchange="this.form.submit()">
+                    {% for value, label in meses_choices %}
+                        <option value="{{ value }}" {% if value == mes_visible.mes_num %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+
+                <a href="{% url 'calendario' %}?anio={{ mes_visible.anio }}&mes={{ mes_visible.mes_siguiente_num }}"
+                   class="calendar__nav-btn" aria-label="Mes siguiente">&gt;</a>
+
+                <select name="start_day" class="calendar__select" onchange="this.form.submit()">
+                    <option value="monday"  {% if start_day == 'monday' %}selected{% endif %}>Start Day</option>
+                    <option value="sunday"  {% if start_day == 'sunday' %}selected{% endif %}>Sunday</option>
+                </select>
+
+                <a href="{% url 'calendario' %}" class="calendar__today-btn">Today</a>
+            </form>
+
+            <div class="calendar__grid" role="grid">
+                {% for nombre_dia in nombres_dias %}
+                    <div class="calendar__day-label" role="columnheader">{{ nombre_dia }}</div>
+                {% endfor %}
+
+                {% for dia in dias_calendario %}
+                    <div class="calendar__cell
+                                calendar__cell--{{ dia.estado_clase }}
+                                {% if dia.es_otro_mes %}calendar__cell--muted{% endif %}
+                                {% if dia.es_hoy %}calendar__cell--today{% endif %}"
+                         role="gridcell"
+                         aria-label="{{ dia.aria_label }}">
+                        <span class="calendar__cell-number">{{ dia.numero }}</span>
+                        {% if dia.estado_label %}
+                            <span class="calendar__cell-state">{{ dia.estado_label }}</span>
+                        {% elif not dia.es_otro_mes %}
+                            <span class="calendar__cell-state calendar__cell-state--empty">Sin encuesta</span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <aside class="calendar-sidebar">
+            <div class="calendar-legend" aria-label="Leyenda del calendario">
+                {% for item in leyenda %}
+                    <div class="calendar-legend__item">
+                        <span class="calendar-legend__dot calendar-legend__dot--{{ item.clase }}"></span>
+                        <span>{{ item.label }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="activities-card">
+                <h2 class="activities-card__title">Mis actividades</h2>
+                {% if mis_actividades %}
+                    <ul class="activities-card__list">
+                        {% for actividad in mis_actividades %}
+                            <li class="activities-card__item">
+                                <strong>{{ actividad.hora }}</strong> &middot; {{ actividad.titulo }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="activities-card__empty">Sin actividades programadas para hoy.</p>
+                {% endif %}
+            </div>
+
+            <div class="recommendation-card" aria-label="Recomendacion del dia">
+                <h3 class="recommendation-card__title">Recomendacion de hoy:</h3>
+                <p class="recommendation-card__body">
+                    {{ recomendacion.texto|default:'Ve por un cafe, mereces un descanso' }}
+                </p>
+                <img src="{% static 'img/taza_cafe.png' %}"
+                alt="Imagen ilustrativa de la recomendación"
+                class="recommendation-card__image"
+                aria-hidden="true">
+            </div>
+        </aside>
+    </div>
+{% endblock %}

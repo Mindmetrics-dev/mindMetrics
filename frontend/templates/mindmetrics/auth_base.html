@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MindMetrics{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}">
+</head>
+<body>
+    <main class="auth-shell">
+        <div class="auth-card">
+            
+            <div class="auth-card__brand">
+                {% block auth_brand %}
+                {% endblock %}
+            </div>
+
+            {% block auth_content %}{% endblock %}
+
+            {% block auth_footer %}{% endblock %}
+
+        </div>
+    </main>
+</body>
+</html>

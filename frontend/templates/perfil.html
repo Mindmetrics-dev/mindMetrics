@@ -1,0 +1,148 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - MindMetrics{% endblock %}
+
+{% block content %}
+<div class="perfil-page">
+
+    {# ── Mensajes ──────────────────────────────────────────────────────────── #}
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="perfil-alert perfil-alert--{{ msg.tags }}">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {# ── Cabecera de perfil ──────────────────────────────────────────── #}
+        <div class="perfil-header">
+            <div class="perfil-avatar" aria-hidden="true">
+                {{ request.user.username|first|upper }}
+            </div>
+            <div class="perfil-header__info">
+                <p class="perfil-header__name">@{{ request.user.username }}</p>
+                <p class="perfil-header__email">{{ request.user.email }}</p>
+                <p class="perfil-header__since">
+                    Miembro desde {{ request.user.date_joined|date:"F Y" }}
+                </p>
+            </div>
+        </div>
+
+        {# ── Grid de secciones ────────────────────────────────────────────── #}
+        <div class="perfil-grid">
+
+            {# Sección 1: Acceso #}
+            <section class="perfil-card" aria-label="Información de acceso">
+                <div class="perfil-card__header">
+                    <span class="perfil-card__icon">🔑</span>
+                    <h2 class="perfil-card__title">Acceso</h2>
+                </div>
+                <div class="perfil-card__body">
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}" class="form-group__label">
+                            Nickname
+                        </label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <span class="form-group__error">{{ form.username.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}" class="form-group__label">
+                            Correo electrónico
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <span class="form-group__error">{{ form.email.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-group__label">Cuenta creada</label>
+                        <input type="text" class="form-group__input perfil-input--readonly"
+                               value="{{ request.user.date_joined|date:'d/m/Y' }}" disabled>
+                    </div>
+                </div>
+            </section>
+
+            {# Sección 2: Datos personales #}
+            <section class="perfil-card" aria-label="Datos personales">
+                <div class="perfil-card__header">
+                    <span class="perfil-card__icon">👤</span>
+                    <h2 class="perfil-card__title">Datos personales</h2>
+                </div>
+                <div class="perfil-card__body">
+                    <div class="form-group">
+                        <label for="{{ form.edad.id_for_label }}" class="form-group__label">
+                            Edad (años)
+                        </label>
+                        {{ form.edad }}
+                        {% if form.edad.errors %}
+                            <span class="form-group__error">{{ form.edad.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.estado_civil.id_for_label }}" class="form-group__label">
+                            Estado civil
+                        </label>
+                        {{ form.estado_civil }}
+                        {% if form.estado_civil.errors %}
+                            <span class="form-group__error">{{ form.estado_civil.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+        </div>{# /perfil-grid #}
+
+        {# Sección 3: Salud mental — ancho completo #}
+        <section class="perfil-card perfil-card--full" aria-label="Salud mental">
+            <div class="perfil-card__header">
+                <span class="perfil-card__icon">🧠</span>
+                <h2 class="perfil-card__title">Salud mental</h2>
+            </div>
+            <div class="perfil-card__body">
+                <div class="form-group">
+                    <label for="{{ form.en_tratamiento.id_for_label }}" class="form-group__label">
+                        ¿Estás o empezaste tratamiento por algún diagnóstico?
+                    </label>
+                    {{ form.en_tratamiento }}
+                    {% if form.en_tratamiento.errors %}
+                        <span class="form-group__error">{{ form.en_tratamiento.errors.0 }}</span>
+                    {% endif %}
+                </div>
+                <div class="form-group perfil-detalle-wrap" id="div_detalle_tratamiento" style="display:none;">
+                    <label for="{{ form.detalle_tratamiento.id_for_label }}" class="form-group__label">
+                        Describe brevemente tu tratamiento
+                    </label>
+                    {{ form.detalle_tratamiento }}
+                    {% if form.detalle_tratamiento.errors %}
+                        <span class="form-group__error">{{ form.detalle_tratamiento.errors.0 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        {# ── Acciones ─────────────────────────────────────────────────────── #}
+        <div class="perfil-actions">
+            <a href="{% url 'dashboard' %}" class="btn btn--secondary">Cancelar</a>
+            <button type="submit" class="btn btn--primary">
+                Guardar cambios
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    (function () {
+        const sel = document.getElementById('{{ form.en_tratamiento.id_for_label }}');
+        const det = document.getElementById('div_detalle_tratamiento');
+        function toggle() {
+            if (sel && det) det.style.display = sel.value === 'si' ? 'block' : 'none';
+        }
+        if (sel) { sel.addEventListener('change', toggle); toggle(); }
+    })();
+</script>
+{% endblock %}

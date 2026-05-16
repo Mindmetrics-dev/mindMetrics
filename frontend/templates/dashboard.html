@@ -1,0 +1,101 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/dashboard.html -->
+
+{% block title %}Inicio - MindMetrics{% endblock %}
+
+{% block content %}
+    <header class="dashboard-header">
+        <div>
+            <h1 class="dashboard-header__greeting">
+                Hola, <strong>@{{ usuario.username|default:'Usuario' }}</strong>
+            </h1>
+            <p class="dashboard-header__date">
+                {{ fecha_hoy_formateada|default:'Lunes, dd de mm - semana ##' }}
+            </p>
+        </div>
+
+        <a href="{% url 'registro_diario' %}" class="btn btn--primary">
+            + Registrar Estado
+        </a>
+    </header>
+
+    <section class="grid grid--metrics-3" aria-label="Metricas del dia">
+        <article class="metric-card">
+            <h2 class="metric-card__label">Estado de hoy</h2>
+            {% if sin_datos %}
+                <p class="metric-card__value">--</p>
+                <p class="metric-card__hint">Sin encuesta de hoy</p>
+            {% else %}
+                <p class="metric-card__value metric-card__value--success">
+                    {{ estado_hoy.label|default:'Estable' }}
+                </p>
+                <p class="metric-card__hint">{{ estado_hoy.hint|default:'Basado en tu encuesta de hoy' }}</p>
+            {% endif %}
+        </article>
+
+        <article class="metric-card">
+            <h2 class="metric-card__label">Riesgo estimado</h2>
+            {% if sin_datos %}
+                <p class="metric-card__value">--</p>
+                <p class="metric-card__hint">Sin evaluacion disponible</p>
+            {% else %}
+                <p class="metric-card__value metric-card__value--{{ riesgo.severity|default:'warning' }}">
+                    {{ riesgo.label|default:'Moderado' }}
+                </p>
+                <p class="metric-card__hint">{{ riesgo.hint|default:'Calculado desde la encuesta de hoy' }}</p>
+            {% endif %}
+        </article>
+
+        <article class="metric-card">
+            <h2 class="metric-card__label">Racha de registros</h2>
+            {% if sin_datos %}
+                <p class="metric-card__value">--</p>
+                <p class="metric-card__hint">Sin registros aun</p>
+            {% else %}
+                <p class="metric-card__value metric-card__value--success">
+                    {{ racha.dias|default:'0' }} dias
+                </p>
+                <p class="metric-card__hint">{{ racha.hint|default:'Registros en los ultimos 7 dias' }}</p>
+            {% endif %}
+        </article>
+    </section>
+
+    <section class="grid grid--dashboard-main" style="margin-top: var(--space-8);">
+        <div>
+            <p class="section-label">{{ calendario_semana.titulo|default:'Estado emocional - Ultima semana' }}</p>
+            <p class="calendar__subtitle">{{ calendario_semana.subtitulo|default:'Solo muestra resultados cuando existen encuestas registradas.' }}</p>
+
+            <div class="calendar calendar--compact">
+                <div class="calendar__grid calendar__grid--week" role="grid">
+                    {% for dia in calendario_semana.dias %}
+                        <div class="calendar__cell
+                                    calendar__cell--{{ dia.estado_clase }}
+                                    {% if dia.es_hoy %}calendar__cell--today{% endif %}"
+                             role="gridcell">
+                            <span class="calendar__day-name">{{ dia.dia_corto }}</span>
+                            <span class="calendar__cell-number">{{ dia.numero }}</span>
+                            {% if dia.estado_label %}
+                                <span class="calendar__cell-state">{{ dia.estado_label }}</span>
+                            {% else %}
+                                <span class="calendar__cell-state calendar__cell-state--empty">Sin encuesta</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <aside class="recommendation-card" aria-label="Recomendacion del dia">
+            <h3 class="recommendation-card__title">Recomendacion de hoy:</h3>
+            <p class="recommendation-card__body">
+                {{ recomendacion.texto|default:'Ve por un cafe, mereces un descanso' }}
+            </p>
+            <img src="{% static 'img/taza_cafe.png' %}"
+                alt="Imagen ilustrativa de la recomendación"
+                class="recommendation-card__image"
+                aria-hidden="true">
+        </aside>
+    </section>
+{% endblock %}

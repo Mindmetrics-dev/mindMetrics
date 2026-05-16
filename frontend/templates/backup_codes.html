@@ -1,0 +1,22 @@
+{% extends 'mindmetrics/auth_base.html' %}
+
+{% block title %}MindMetrics — Códigos de respaldo{% endblock %}
+
+{% block auth_content %}
+<h1 class="auth-card__title">Códigos de respaldo</h1>
+<p class="auth-card__subtitle">
+    <strong>Guárdalos en un lugar seguro.</strong> Cada código sirve UNA sola vez y te
+    permite acceder si pierdes tu dispositivo 2FA. <em>No se mostrarán de nuevo.</em>
+</p>
+
+<ul class="backup-codes">
+    {% for code in codes %}
+        <li><code>{{ code }}</code></li>
+    {% endfor %}
+</ul>
+
+<form method="post" class="auth-form">
+    {% csrf_token %}
+    <button type="submit" class="btn btn--primary">He guardado los códigos</button>
+</form>
+{% endblock %}

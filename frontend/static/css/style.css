@@ -1,0 +1,1589 @@
+/* ============================================================
+   Ruta: Frontend/static/css/style.css
+   MindMetrics - Sistema de diseño global
+   Metodología: BEM + CSS Custom Properties
+   ============================================================ */
+
+/* -----------------------------
+   1. RESET & BASE
+------------------------------ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--color-text);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+img,
+svg {
+    max-width: 100%;
+    display: block;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+/* -----------------------------
+   2. DESIGN TOKENS
+------------------------------ */
+:root {
+    /* Brand colors */
+    --color-primary: #2A8E8E;
+    --color-primary-hover: #237575;
+    --color-primary-dark: #0E4A6B;
+
+    /* Surfaces */
+    --color-bg-app: #A8C4C2;
+    --color-bg-navbar: #F5F4EE;
+    --color-bg-auth: #8ab8bb;
+    --color-card-white: #FFFFFF;
+    --color-card-light: #E8EDEC;
+
+    /* Text */
+    --color-text: #1F2937;
+    --color-text-muted: #6B7280;
+    --color-text-inverse: #FFFFFF;
+
+    /* Semantic */
+    --color-success: #0E9594;
+    --color-warning: #D97706;
+    --color-danger: #DC2626;
+
+    /* Form */
+    --color-input-bg: #ECECEC;
+    --color-input-border: #D1D5DB;
+    --color-input-focus: var(--color-primary);
+
+    /* Spacing scale (4px base) */
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 0.75rem;   /* 12px */
+    --space-4: 1rem;      /* 16px */
+    --space-5: 1.25rem;   /* 20px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-8: 2rem;      /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+
+    /* Radii */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-pill: 999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+
+    /* Typography scale */
+    --fs-xs: 0.75rem;
+    --fs-sm: 0.875rem;
+    --fs-base: 1rem;
+    --fs-lg: 1.125rem;
+    --fs-xl: 1.25rem;
+    --fs-2xl: 1.5rem;
+    --fs-3xl: 1.875rem;
+    --fs-4xl: 2.25rem;
+
+    /* Layout */
+    --container-max: 1280px;
+    --navbar-height: 72px;
+}
+
+/* -----------------------------
+   3. LAYOUT HELPERS
+------------------------------ */
+.container {
+    width: 100%;
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+}
+
+.app-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-app);
+}
+
+.app-shell__main {
+    flex: 1;
+    padding: var(--space-8) 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   4. NAVBAR  —  nomenclatura flat (navbar-*)
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Barra exterior: fondo sólido, sin altura fija en el elemento raíz para
+   que el contenido determine la altura naturalmente. */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #ffffff;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Contenedor interno: max-width + flexbox de tres columnas
+   [logo]  ←→  [nav]  ←→  [salir]  */
+.navbar-inner {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+/* ── LOGO ────────────────────────────────────────────────────────────── */
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    flex-shrink: 0;         /* nunca se comprime */
+}
+
+/* Tamaño fijo proporcional: 36 px de alto, ancho automático */
+.navbar-logo-img {
+    height: 60px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.navbar-logo-text {
+    font-size: var(--fs-3xl);
+    font-weight: 1000;
+    color: var(--color-primary-dark);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+
+.navbar-logo-accent {
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+/* ── NAV LINKS ───────────────────────────────────────────────────────── */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);     /* separación gestionada por padding del link */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-link {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--fs-2xl);
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    position: relative;
+    transition: color 0.15s ease, background-color 0.15s ease;
+    white-space: nowrap;
+}
+
+/* Línea inferior animada en hover */
+.navbar-link::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: var(--space-3);
+    right: var(--space-3);
+    height: 2px;
+    background: var(--color-primary);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+}
+
+.navbar-link:hover {
+    color: var(--color-primary);
+    background-color: rgba(42, 142, 142, 0.06);
+    text-decoration: none;
+}
+
+.navbar-link:hover::after {
+    transform: scaleX(1);
+}
+
+/* Estado activo (inyectado por Django: class="navbar-link is-active") */
+.navbar-link.is-active {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.navbar-link.is-active::after {
+    transform: scaleX(1);
+}
+
+/* ── BOTÓN SALIR ─────────────────────────────────────────────────────── */
+.navbar-exit-form {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-exit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) var(--space-5);
+    font-size: var(--fs-2xl);
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #1a7a7a 100%);
+    border: none;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(42, 142, 142, 0.30);
+    transition: opacity 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+}
+
+.navbar-exit:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(42, 142, 142, 0.40);
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.navbar-exit:active {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* ── HAMBURGUESA (móvil) ─────────────────────────────────────────────── */
+.navbar-toggle {
+    display: none;             /* oculto en desktop */
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    padding: var(--space-1);
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.15s ease;
+    order: 3;                  /* siempre al final en flex */
+}
+
+.navbar-toggle:hover {
+    background-color: rgba(42, 142, 142, 0.08);
+}
+
+.navbar-toggle-bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-text);
+    border-radius: 2px;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+/* -----------------------------
+   5. AUTH LAYOUT (login, registro, 2fa)
+------------------------------ */
+.auth-shell {
+    min-height: 100vh;
+    background-color: var(--color-bg-auth);
+    background-image: url("../img/FondoRegistro.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8) var(--space-4);
+    position: relative;
+    
+}
+
+.auth-card {
+    background-color: var(--color-card-white);
+    border-radius: var(--radius-lg);
+    padding: var(--space-10);
+    width: 100%;
+    max-width: 460px;
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-card__brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-8);
+}
+
+.auth-card__brand-title {
+    font-size: var(--fs-4xl);       /* Un tamaño grande (2.25rem) */
+    font-weight: 900;               /* Extra negrita para darle peso */
+    color: var(--color-primary-dark);
+    text-align: center;
+    letter-spacing: -0.03em;        /* Letras ligeramente juntas (look tech) */
+    margin-bottom: var(--space-8);
+    line-height: 1;
+}
+.auth-card__brand-title span {
+    color: var(--color-primary);
+    font-weight: 400;               /* Más delgado para crear contraste visual */
+}
+
+.auth-card__title {
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+.auth-card__subtitle {
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-6);
+}
+
+.auth-card__footer {
+    margin-top: var(--space-8);
+    text-align: center;
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+}
+
+/* -----------------------------
+   7b. CONSENT BODY (consentimiento informado)
+------------------------------ */
+.consent-body {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border, #e2e8f0);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-top: var(--space-4);
+    font-size: var(--fs-xs);
+    line-height: 1.7;
+    color: var(--color-text);
+    background-color: var(--color-bg, #fafafa);
+}
+
+.consent-body h3 {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+    color: var(--color-text);
+}
+
+.consent-body h4 {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-1);
+    color: var(--color-primary-dark, #4338ca);
+}
+
+.consent-body ul {
+    padding-left: var(--space-5);
+    margin: var(--space-2) 0;
+}
+
+.consent-body li {
+    margin-bottom: var(--space-1);
+}
+
+.consent-body .consent-meta {
+    font-size: var(--fs-xs);
+    color: #6b7280;
+    font-style: italic;
+    margin-bottom: var(--space-3);
+}
+
+.auth-card__footer-link {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+/* -----------------------------
+   6. FORM CONTROLS
+------------------------------ */
+.form-group {
+    margin-bottom: var(--space-4);
+}
+
+.form-group__label {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+.form-group__input,
+.form-group__textarea {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-input-bg);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.form-group__input:focus,
+.form-group__textarea:focus {
+    outline: none;
+    border-color: var(--color-input-focus);
+    background-color: #FFFFFF;
+}
+
+.form-group__input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.form-group__error {
+    display: block;
+    margin-top: var(--space-1);
+    font-size: var(--fs-xs);
+    color: var(--color-danger);
+}
+
+/* -----------------------------
+   7. BUTTONS
+------------------------------ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    transition: background-color 0.15s ease, transform 0.05s ease;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn--primary {
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
+}
+
+.btn--primary:hover {
+    background-color: var(--color-primary-hover);
+    text-decoration: none;
+}
+
+.btn--block {
+    width: 100%;
+}
+
+.btn--ghost {
+    background-color: transparent;
+    color: var(--color-primary);
+}
+
+.btn--ghost:hover {
+    background-color: rgba(42, 142, 142, 0.08);
+    text-decoration: none;
+}
+
+.btn__icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* -----------------------------
+   8. OTP (verificación 2FA)
+------------------------------ */
+.otp {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+    margin-block: var(--space-6);
+}
+
+.otp__input {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    background-color: var(--color-input-bg);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+}
+.otp__input--single {
+    width: 300px;
+    text-align: center;
+    letter-spacing: 1.0em; /* Esto separa los números simulando recuadros */
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: 1.5rem;
+    padding: 10px;
+}
+
+.otp__input:focus {
+    outline: none;
+    border-color: var(--color-input-focus);
+    background-color: #FFFFFF;
+}
+
+/* -----------------------------
+   9. METRIC CARD (dashboard)
+------------------------------ */
+.metric-card {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.metric-card__label {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+.metric-card__value {
+    font-size: var(--fs-3xl);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: var(--space-2);
+}
+
+.metric-card__value--success { color: var(--color-success); }
+.metric-card__value--warning { color: var(--color-warning); }
+.metric-card__value--danger  { color: var(--color-danger); }
+
+.metric-card__hint {
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+}
+
+/* -----------------------------
+   10. DASHBOARD HEADER
+------------------------------ */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-8);
+    flex-wrap: wrap;
+    gap: var(--space-4);
+}
+
+.dashboard-header__greeting {
+    font-size: var(--fs-3xl);
+    font-weight: 400;
+    color: var(--color-text);
+}
+
+.dashboard-header__greeting strong {
+    font-weight: 700;
+}
+
+.dashboard-header__date {
+    font-size: var(--fs-xs);
+    color: var(--color-text);
+    margin-top: var(--space-1);
+}
+
+/* -----------------------------
+   11. RESOURCE CARD
+------------------------------ */
+.resource-card {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resource-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.resource-card__title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.resource-card__desc,
+.resource-card__benefit {
+    font-size: var(--fs-xs);
+    color: var(--color-text);
+}
+
+.resource-card__link {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--color-primary-dark);
+}
+
+/* -----------------------------
+   11b. RESOURCE CARD ENHANCEMENTS
+------------------------------ */
+.resource-card__icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.resource-card__btn {
+    margin-top: auto;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--fs-sm);
+    border-radius: var(--radius-pill);
+}
+
+.btn--sm {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--fs-sm);
+}
+
+/* -----------------------------
+   11c. APOYO CARD (rutas de apoyo — tono diferente)
+------------------------------ */
+.apoyo-card {
+    background: linear-gradient(135deg, #F0E6F6 0%, #E8DCF0 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    text-align: center;
+    border-left: 4px solid #8B5CF6;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apoyo-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.apoyo-card__icon-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+.apoyo-card__icon {
+    width: 40px;
+    height: 40px;
+    color: #7C3AED;
+}
+
+.apoyo-card__title {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: #5B21B6;
+}
+
+.apoyo-card__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+}
+
+.apoyo-card__label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: #7C3AED;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.apoyo-card__value {
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.grid--apoyo-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 700px;
+}
+
+/* -----------------------------
+   12. GRID UTILITIES
+------------------------------ */
+.grid {
+    display: grid;
+    gap: var(--space-6);
+}
+
+.grid--metrics-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid--resources-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid--recursos-3x3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+}
+
+.grid--recursos-3x3 .lineas-atencion {
+    grid-column: 3;
+    grid-row: 1 / 4;
+}
+
+/* -----------------------------
+   11d. LÍNEAS DE ATENCIÓN
+------------------------------ */
+.lineas-atencion {
+    background: linear-gradient(135deg, #EAF2F1 0%, #DCE9E8 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: inset 4px 0 0 #6E9C9C;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.lineas-atencion__title {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: #3F6E6E;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.lineas-atencion__icon {
+    width: 24px;
+    height: 24px;
+    color: #5E8B8B;
+    flex-shrink: 0;
+}
+
+.linea-card {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.linea-card__nombre {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: #3F6E6E;
+}
+
+.linea-card__telefono {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.linea-card__desc {
+    font-size: var(--fs-xs);
+    color: var(--color-text);
+}
+
+.linea-card__horario {
+    font-size: var(--fs-xs);
+    color: #5E8B8B;
+    font-weight: 500;
+}
+
+.grid--dashboard-main {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+}
+
+/* -----------------------------
+   13. CALENDAR
+------------------------------ */
+.calendar {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+}
+
+.calendar--compact {
+    padding: var(--space-5);
+}
+
+.calendar__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.calendar__subtitle {
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-3);
+}
+
+.calendar__day-badge {
+    background-color: var(--color-card-white);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    text-align: center;
+    min-width: 64px;
+}
+
+.calendar__day-name { font-size: var(--fs-xs); color: var(--color-text-muted); font-weight: 700; }
+.calendar__day-num { font-size: var(--fs-3xl); font-weight: 700; color: var(--color-text); }
+
+.calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+    text-align: center;
+}
+
+.calendar__grid--week {
+    align-items: stretch;
+}
+
+.calendar__day-label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--color-text-muted);
+    padding: var(--space-2);
+}
+
+.calendar__day-label--week {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.calendar__cell {
+    min-height: 88px;
+    padding: var(--space-3);
+    font-size: var(--fs-base);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    background-color: rgba(255, 255, 255, 0.72);
+}
+
+.calendar__cell:hover { background-color: rgba(42, 142, 142, 0.08); }
+.calendar__cell--muted { color: var(--color-text-muted); }
+.calendar__cell--today { border: 2px solid var(--color-primary); font-weight: 700; }
+.calendar__cell--success { background-color: rgba(14, 149, 148, 0.12); }
+.calendar__cell--warning { background-color: rgba(217, 119, 6, 0.12); }
+.calendar__cell--danger { background-color: rgba(220, 38, 38, 0.12); }
+.calendar__cell--neutral { background-color: rgba(31, 41, 55, 0.06); }
+.calendar__cell--empty {
+    background-color: rgba(255, 255, 255, 0.72);
+    border: 1px dashed rgba(107, 114, 128, 0.35);
+}
+
+.calendar__cell-number {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+}
+
+.calendar__cell-state {
+    font-size: var(--fs-xs);
+    line-height: 1.2;
+}
+
+.calendar__cell-state--empty {
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+/* -----------------------------
+   14. FORM CARD (registro diario, anamnesis)
+------------------------------ */
+.form-card {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-10);
+    box-shadow: var(--shadow-sm);
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.form-card__brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-8);
+}
+
+.form-card__scale-hint {
+    font-size: var(--fs-base);
+    color: var(--color-text);
+    font-weight: 500;
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-2);
+}
+
+.form-card__submit {
+    margin-top: var(--space-8);
+    display: flex;
+    justify-content: center;
+}
+
+/* -----------------------------
+   15. RECOMMENDATION CARD (dashboard)
+------------------------------ */
+.recommendation-card {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    position: relative;
+    min-height: 180px;
+}
+
+.recommendation-card__title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.recommendation-card__body {
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+    max-width: 60%;
+    line-height: 1.7;
+}
+
+.recommendation-card__image {
+    position: absolute;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    width: 100px;
+    height: auto;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+/* -----------------------------
+   16. CHART PLACEHOLDER (dashboard)
+------------------------------ */
+.chart-block {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    min-height: 240px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+
+.section-label {
+    font-size: var(--fs-2xl);
+    color: var(--color-text);
+    margin-bottom: var(--space-3);
+    font-weight: 500;
+}
+
+/* -----------------------------
+   17. CALENDAR PAGE LAYOUT
+------------------------------ */
+.calendar-page {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-6);
+    align-items: start;
+}
+
+.calendar__controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.calendar__select,
+.calendar__nav-btn,
+.calendar__today-btn {
+    background-color: var(--color-card-white);
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+    cursor: pointer;
+}
+
+.calendar__today-btn {
+    margin-left: auto;
+}
+
+.calendar__nav-btn {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* "Mis actividades" sidebar */
+.activities-card {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-6);
+    box-shadow: var(--shadow-sm);
+    min-height: 320px;
+}
+
+.activities-card__title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-4);
+}
+
+.activities-card__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.activities-card__item {
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--color-card-white);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+}
+
+.activities-card__empty {
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+.calendar-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+/* Calendar legend */
+.calendar-legend {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-6);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+}
+
+.calendar-legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+}
+
+.calendar-legend__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.calendar-legend__dot--success { background-color: var(--color-success); }
+.calendar-legend__dot--warning { background-color: var(--color-warning); }
+.calendar-legend__dot--danger  { background-color: var(--color-danger); }
+.calendar-legend__dot--empty   { background-color: var(--color-input-border); }
+
+/* -----------------------------
+   18. HISTORIAL PLACEHOLDER
+------------------------------ */
+.historial-placeholder {
+    background-color: var(--color-card-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-12);
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.historial-placeholder__text {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.8;
+}
+
+/* -----------------------------
+   19. SCREEN-READER ONLY
+------------------------------ */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* -----------------------------
+   20. RESPONSIVE
+------------------------------ */
+@media (max-width: 1024px) {
+    .grid--resources-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid--apoyo-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid--metrics-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid--dashboard-main { grid-template-columns: 1fr; }
+    .calendar-page { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    /* Hamburguesa visible en móvil */
+    .navbar-toggle { display: flex; }
+
+    /* Nav colapsado por defecto */
+    .navbar-nav {
+        display: none;
+        position: absolute;
+        top: 64px;               /* igual que la altura de .navbar-inner */
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--space-4) var(--space-6);
+        gap: var(--space-1);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        z-index: 199;
+    }
+
+    /* JS añade esta clase via data-navbar-toggle (main.js) */
+    .navbar-nav.is-open { display: flex; }
+
+    /* En móvil, el botón Salir se mueve dentro del menú desplegable
+       añadiendo una clase .navbar-exit-form--inline en JS, o lo dejamos
+       siempre visible al lado del toggle para simplicidad. */
+    .navbar-exit-form { margin-left: auto; margin-right: var(--space-3); }
+    .navbar-exit { padding: var(--space-1) var(--space-4); font-size: var(--fs-xs); }
+
+    /* Grids generales */
+    .grid--metrics-3    { grid-template-columns: 1fr; }
+    .grid--resources-4  { grid-template-columns: 1fr; }
+    .grid--apoyo-2      { grid-template-columns: 1fr; }
+    .auth-card          { padding: var(--space-6); }
+    .otp__input         { width: 40px; height: 48px; }
+}
+
+/* -----------------------------
+   21. HISTORIAL TABLA & BADGES
+------------------------------ */
+.historial-page {
+    padding: var(--space-6) 0;
+}
+
+.historial-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+}
+
+.historial-header__title {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.historial-header__filter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.historial-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    background: var(--color-card-light);
+}
+
+.historial-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+}
+
+.historial-table thead {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.historial-table th,
+.historial-table td {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.historial-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.historial-table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* Badges de nivel de riesgo */
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: var(--fs-xs, 0.75rem);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge--success  { background: #d1fae5; color: #065f46; }
+.badge--warning  { background: #fef3c7; color: #92400e; }
+.badge--danger   { background: #fee2e2; color: #991b1b; }
+.badge--neutral  { background: #f3f4f6; color: #374151; }
+
+/* -----------------------------
+   22. BOTÓN SECUNDARIO
+------------------------------ */
+.btn--secondary {
+    background-color: transparent;
+    color: var(--color-text);
+    border: 1.5px solid var(--color-input-border);
+}
+.btn--secondary:hover {
+    background-color: var(--color-card-light);
+    text-decoration: none;
+}
+
+/* -----------------------------
+   23. PÁGINA DE PERFIL
+------------------------------ */
+.perfil-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding-bottom: var(--space-12);
+}
+
+/* Alertas inline */
+.perfil-alert {
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    margin-bottom: var(--space-6);
+}
+.perfil-alert--success { background: #d1fae5; color: #065f46; }
+.perfil-alert--error   { background: #fee2e2; color: #991b1b; }
+.perfil-alert--warning { background: #fef3c7; color: #92400e; }
+.perfil-alert--info    { background: #dbeafe; color: #1e40af; }
+
+/* Cabecera con avatar */
+.perfil-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8) var(--space-8);
+    margin-bottom: var(--space-6);
+    color: #fff;
+}
+
+.perfil-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--fs-3xl);
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    letter-spacing: -1px;
+}
+
+.perfil-header__info { flex: 1; }
+
+.perfil-header__name {
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-1);
+}
+
+.perfil-header__email {
+    font-size: var(--fs-sm);
+    opacity: 0.85;
+    margin-bottom: var(--space-1);
+}
+
+.perfil-header__since {
+    font-size: var(--fs-xs);
+    opacity: 0.65;
+}
+
+/* Grid 2 columnas para las primeras secciones */
+.perfil-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+/* Cards de sección */
+.perfil-card {
+    background: var(--color-card-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.perfil-card--full {
+    margin-bottom: var(--space-5);
+}
+
+.perfil-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-6);
+    background: var(--color-card-light);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.perfil-card__icon {
+    font-size: var(--fs-lg);
+    line-height: 1;
+}
+
+.perfil-card__title {
+    font-size: var(--fs-base);
+    font-weight: 600;
+    color: var(--color-primary-dark);
+    margin: 0;
+}
+
+.perfil-card__body {
+    padding: var(--space-5) var(--space-6);
+}
+
+/* Input deshabilitado (solo lectura) */
+.perfil-input--readonly {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Área de acciones */
+.perfil-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
+/* Responsive: 1 columna en móvil */
+@media (max-width: 640px) {
+    .perfil-grid { grid-template-columns: 1fr; }
+    .perfil-header { flex-direction: column; text-align: center; }
+    .perfil-avatar { width: 60px; height: 60px; font-size: var(--fs-2xl); }
+    .perfil-actions { flex-direction: column-reverse; }
+    .perfil-actions .btn { width: 100%; justify-content: center; }
+}
+
+/* ── 24. RESULTADO REGISTRO ─────────────────────────────────────────────── */
+.resultado-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 120px);
+    padding: var(--space-6);
+}
+
+.resultado-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-xl, 20px);
+    padding: var(--space-8, 3rem);
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,.10);
+    border-top: 6px solid var(--color-primary);
+}
+
+.resultado-card--success { border-top-color: #22c55e; }
+.resultado-card--warning { border-top-color: #f59e0b; }
+.resultado-card--danger  { border-top-color: #ef4444; }
+.resultado-card--critical { border-top-color: #7f1d1d; }
+
+.resultado-icon {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: var(--space-4);
+}
+
+.resultado-titulo {
+    font-size: var(--fs-2xl, 1.5rem);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: var(--space-1);
+}
+
+.resultado-subtitulo {
+    font-size: var(--fs-sm, 0.875rem);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-6);
+}
+
+.resultado-nivel-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-6);
+}
+
+.resultado-nivel-etiqueta {
+    font-size: var(--fs-sm, 0.875rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--color-text-muted);
+}
+
+.resultado-nivel-valor {
+    display: inline-block;
+    padding: var(--space-2) var(--space-5, 1.25rem);
+    border-radius: 999px;
+    font-size: var(--fs-xl, 1.25rem);
+    font-weight: 700;
+}
+
+.resultado-nivel-valor--success  { background: #dcfce7; color: #15803d; }
+.resultado-nivel-valor--warning  { background: #fef3c7; color: #b45309; }
+.resultado-nivel-valor--danger   { background: #fee2e2; color: #b91c1c; }
+.resultado-nivel-valor--critical { background: #7f1d1d; color: #fef2f2; }
+.resultado-nivel-valor--neutral  { background: var(--color-surface-alt, #f3f4f6); color: var(--color-text-muted); }
+
+.resultado-alerta {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: var(--radius-md, 10px);
+    padding: var(--space-4);
+    color: #9a3412;
+    font-size: var(--fs-sm, 0.875rem);
+    margin-bottom: var(--space-6);
+    text-align: left;
+}
+
+.resultado-acciones {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+    .resultado-card { padding: var(--space-6) var(--space-4); }
+    .resultado-acciones { flex-direction: column; }
+    .resultado-acciones .btn { width: 100%; justify-content: center; }
+}

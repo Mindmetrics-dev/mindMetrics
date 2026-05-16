@@ -1,0 +1,64 @@
+{% extends 'mindmetrics/auth_base.html' %}
+{% load static %}
+
+{% block title %}Verificación 2FA - MindMetrics{% endblock %}
+
+{% block auth_brand %}{% endblock %}
+
+{% block auth_content %}
+    <h1 class="auth-card__title">Verificación 2FA</h1>
+    <p class="auth-card__subtitle">
+        Introduce el código de tu app autenticadora o uno de tus códigos de respaldo.
+        <br><small>Sesión: {{ email }}</small>
+    </p>
+
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert--{{ msg.tags }}">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'login_step2' %}" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-group__error" role="alert">
+                {{ form.non_field_errors|join:" " }}
+            </div>
+        {% endif %}
+
+        {# Mantenemos el diseño de 6 inputs OTP del código 1 #}
+        <div class="otp" role="group" aria-label="Código de verificación de 6 dígitos">
+            
+                <input type="text"
+                   name="token" 
+                   inputmode="numeric"
+                   pattern="[0-9]{6}"
+                   maxlength="6"
+                   class="otp__input--single"
+                   placeholder="123456"
+                   aria-label="Código de 6 dígitos"
+                   autocomplete="one-time-code"
+                   required
+                   autofocus>
+            
+        </div>
+
+        {# Mostramos errores específicos del campo token (usando join) #}
+        {% if form.token.errors %}
+            <span class="form-group__error" style="display:block; margin-top:8px;">
+                {{ form.token.errors|join:" " }}
+            </span>
+        {% endif %}
+
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top: var(--space-4);">
+            <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon">
+            Verificar
+        </button>
+
+        {# Reemplazamos el enlace "Reenviar código" por el de "Volver al login" (lógica del código 2) #}
+        <div style="text-align: center; margin-top: var(--space-4);">
+            <a href="{% url 'login_step1' %}" class="btn btn--ghost">← Volver al login</a>
+        </div>
+    </form>
+{% endblock %}

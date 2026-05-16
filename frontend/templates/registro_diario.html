@@ -1,0 +1,139 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+<!-- Ruta: Frontend/templates/registro_diario.html -->
+
+{% block title %}Registro diario - MindMetrics{% endblock %}
+
+{% block content %}
+    <div class="form-card" role="form" aria-labelledby="registroTitulo">
+        <div class="form-card__brand">
+            <img src="{% static 'img/logo-mindmetrics.png' %}"
+                 alt="MindMetrics"
+                 width="220">
+        </div>
+
+        <h1 id="registroTitulo" class="sr-only">Registro emocional diario</h1>
+
+        <form method="post" action="{% url 'registro_diario' %}" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-group__error" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            {# --- Bloque 1: Hábitos (horas) --- #}
+            <div class="form-group">
+                <label for="id_horas_sueno" class="form-group__label">¿Cuántas horas dormiste hoy?</label>
+                <input type="number" step="0.5" min="0" max="24"
+                       id="id_horas_sueno" name="horas_sueno"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_sueno.value|default_if_none:'' }}" required>
+                {% if form.horas_sueno.errors %}<span class="form-group__error">{{ form.horas_sueno.errors.0 }}</span>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_horas_trabajo_estudio" class="form-group__label">¿Cuántas horas trabajaste o estudiaste hoy?</label>
+                <input type="number" step="0.5" min="0" max="24"
+                       id="id_horas_trabajo_estudio" name="horas_trabajo_estudio"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_trabajo_estudio.value|default_if_none:'' }}" required>
+                {% if form.horas_trabajo_estudio.errors %}<span class="form-group__error">{{ form.horas_trabajo_estudio.errors.0 }}</span>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_horas_pantallas" class="form-group__label">¿Cuántas horas pasaste frente a pantallas hoy, incluyendo trabajo, estudio y ocio?</label>
+                <input type="number" step="0.5" min="0" max="24"
+                       id="id_horas_pantallas" name="horas_pantallas"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_pantallas.value|default_if_none:'' }}" required>
+                {% if form.horas_pantallas.errors %}<span class="form-group__error">{{ form.horas_pantallas.errors.0 }}</span>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_horas_actividad_fisica" class="form-group__label">¿Cuántas horas realizaste actividad física hoy?</label>
+                <input type="number" step="0.5" min="0" max="24"
+                       id="id_horas_actividad_fisica" name="horas_actividad_fisica"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.horas_actividad_fisica.value|default_if_none:'' }}" required>
+                {% if form.horas_actividad_fisica.errors %}<span class="form-group__error">{{ form.horas_actividad_fisica.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# --- Bloque 2: Escala 1-10 estrés --- #}
+            <p class="form-card__scale-hint">En una escala de 1 a 10, donde 1 es nada de estrés y 10 es estrés extremo:</p>
+
+            <div class="form-group">
+                <label for="id_estres_laboral" class="form-group__label">¿Qué nivel de estrés laboral experimentaste hoy?</label>
+                <input type="number" min="1" max="10"
+                       id="id_estres_laboral" name="estres_laboral"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.estres_laboral.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_estres_academico" class="form-group__label">¿Qué nivel de estrés académico experimentaste hoy?</label>
+                <input type="number" min="1" max="10"
+                       id="id_estres_academico" name="estres_academico"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.estres_academico.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_estres_financiero" class="form-group__label">¿Qué nivel de estrés financiero experimentaste hoy?</label>
+                <input type="number" min="1" max="10"
+                       id="id_estres_financiero" name="estres_financiero"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.estres_financiero.value|default_if_none:'' }}" required>
+            </div>
+
+            {# --- Bloque 3: Interacción y ánimo --- #}
+            <div class="form-group">
+                <label for="id_interaccion_social" class="form-group__label">En una escala de 1 a 10, donde 1 es ninguna interacción y 10 es mucha interacción, ¿Qué tanta interacción tuviste hoy con tu círculo cercano?</label>
+                <input type="number" min="1" max="10"
+                       id="id_interaccion_social" name="interaccion_social"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.interaccion_social.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_animo" class="form-group__label">En una escala de 1 a 10, donde 1 es muy bajo y 10 es muy alto, ¿Cómo describirías tu estado de ánimo hoy?</label>
+                <input type="number" min="1" max="10"
+                       id="id_animo" name="animo"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.animo.value|default_if_none:'' }}" required>
+            </div>
+
+            {# --- Bloque 4: Cualitativos --- #}
+            <div class="form-group">
+                <label for="id_autocuidado" class="form-group__label">¿Realizaste alguna actividad de autocuidado hoy?</label>
+                <input type="text"
+                       id="id_autocuidado" name="autocuidado"
+                       class="form-group__input" placeholder="Escribe..."
+                       value="{{ form.autocuidado.value|default_if_none:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_emocion_predominante" class="form-group__label">¿Qué emoción predominó durante el día?</label>
+                <select id="id_emocion_predominante" name="emocion_predominante"
+                        class="form-group__input" required>
+                    <option value="" disabled {% if not form.emocion_predominante.value %}selected{% endif %}>Escribe...</option>
+                    {% for value, label in emociones_choices %}
+                        <option value="{{ value }}"
+                                {% if form.emocion_predominante.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-card__submit">
+                <button type="submit" class="btn btn--primary">
+                    <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

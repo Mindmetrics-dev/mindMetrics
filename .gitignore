@@ -1,12 +1,62 @@
-# Python
+# ─── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
 
-# Secretos (MindMetrics Security)
+# ─── Virtual environments ─────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ─── Django ───────────────────────────────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+backend/staticfiles/
+backend/media/
+Backend/staticfiles/
+Backend/media/
+
+# ─── Secrets / Configuración local ────────────────────────────────────────────
 .env
+backend/.env
+Backend/.env
+*.pem
+*.key
 
-# Docker
-.docker/
+# ─── ETL / Runtime ────────────────────────────────────────────────────────────
+logs/
+reports/
+backend/etl_auditorias/*.csv
+!backend/etl_auditorias/.gitkeep
 
-# Windows metadata
+# ─── IDEs ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Sistema operativo ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
 *:Zone.Identifier
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+.docker/
+postgres_data/
+*.pid
+
+# ─── Coverage / Testing ───────────────────────────────────────────────────────
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+.tox/
+
+.claude

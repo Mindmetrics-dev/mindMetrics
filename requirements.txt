@@ -1,6 +1,39 @@
-Django>=4.2,<5.0
-psycopg2-binary>=2.9
-scikit-learn>=1.3.0
+# =============================================================================
+# MindMetrics — Requirements unificados
+# Generado consolidando:
+#   - backend/requirements.txt
+#   - backend/requirements-dev.txt
+#   - requirements.txt (raíz anterior)
+# =============================================================================
+
+# ─── Framework principal ─────────────────────────────────────────────────────
+# Conflicto resuelto: backend usaba >=5.0,<5.2 | raíz usaba >=4.2,<5.0
+Django>=5.0,<5.2
+# Conflicto resuelto: backend usaba psycopg3 (psycopg[binary]) | raíz usaba psycopg2-binary
+psycopg[binary]>=3.1.8
+
+# ─── Configuración de entorno ────────────────────────────────────────────────
+# Nota: el backend activo usa python-decouple; python-dotenv y django-environ
+# estaban en la raíz anterior. Mantener los tres hasta migración completa.
+python-decouple==3.8
+
+# ─── Seguridad / Auth / 2FA ──────────────────────────────────────────────────
+django-otp>=1.5.4
 django-two-factor-auth>=1.15
-python-dotenv==1.0.1
-django-environ==0.11.2
+qrcode[pil]>=7.4
+django-axes>=6.4
+argon2-cffi>=23.1
+
+# ─── Machine Learning ────────────────────────────────────────────────────────
+scikit-learn>=1.3.0
+
+# ─── API REST ────────────────────────────────────────────────────────────────
+djangorestframework==3.14.0
+requests==2.31.0
+
+# ─── Testing / Desarrollo ────────────────────────────────────────────────────
+pytest>=8.0
+pytest-django>=4.8
+factory-boy>=3.3
+pytest-cov>=4.1
+freezegun>=1.4
