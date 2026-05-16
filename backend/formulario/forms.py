@@ -196,8 +196,18 @@ class EvaluacionInicialForm(forms.ModelForm):
             "historial_familiar":   "¿Antecedentes familiares de salud mental?",
         }
 
+    # Campos que el agente necesita para calcular riesgo — todos obligatorios.
+    CAMPOS_REQUERIDOS = {
+        "edad", "genero", "estado_relacion", "situacion_trabajo",
+        "hr_sueno", "hr_trabajo", "hr_pantalla", "hr_act_fis",
+        "estres_laboral", "estres_academico", "estres_financ",
+        "satisfaccion_laboral", "cambio_emocional",
+        "uso_sustancias", "diagnostico_previo",
+        "dificultad_concentra", "tratamiento_previo", "apoyo_percibido",
+        "historial_panico", "historial_familiar",
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Todos opcionales: el onboarding completo es un nice-to-have.
-        for f in self.fields.values():
-            f.required = False
+        for name, field in self.fields.items():
+            field.required = name in self.CAMPOS_REQUERIDOS

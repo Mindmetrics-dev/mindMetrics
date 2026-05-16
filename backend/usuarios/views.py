@@ -13,6 +13,7 @@ from __future__ import annotations
 import base64
 import secrets
 from io import BytesIO
+import random
 
 import qrcode
 from django.contrib import messages
@@ -259,10 +260,27 @@ def logout_view(request: HttpRequest) -> HttpResponse:
 # ─────────────────────────────────────────────────────────────────────────────
 @login_required(login_url="login_step1", redirect_field_name="next")
 def dashboard(request: HttpRequest) -> HttpResponse:
-    from calendario.view import _build_week_context, _get_dashboard_summary
+    from calendario.views import _build_week_context, _get_dashboard_summary
     hoy = timezone.localdate()
-    calendario_semana = _build_week_context(hoy)
-    resumen = _get_dashboard_summary(hoy)
+    usuario_dominio = getattr(request.user, 'usuario_dominio', None)
+    calendario_semana = _build_week_context(hoy, usuario_dominio)
+    resumen = _get_dashboard_summary(hoy, usuario_dominio)
+
+    recomendaciones = [
+        "Tómate 10 minutos para respirar y desconectarte.",
+        "Haz una pausa activa: levántate, estírate y camina 5 minutos.",
+        "Bebe un vaso de agua ahora mismo. La hidratación mejora el ánimo.",
+        "Escribe tres cosas por las que estás agradecido hoy.",
+        "Escucha tu canción favorita y concéntrate solo en la música.",
+        "Sal a tomar aire fresco por 5 minutos.",
+        "Apaga las notificaciones por una hora y concéntrate en una sola tarea.",
+        "Practica la respiración 4-7-8: inhala 4s, mantén 7s, exhala 8s.",
+        "Habla con alguien de confianza sobre cómo te sientes.",
+        "Date un momento para hacer algo que disfrutes, aunque sea breve."
+    ]
+
+    recomendacion_elegida = random.choice(recomendaciones)
+
     contexto = {
         "active_section": "inicio",
         "usuario": request.user,
@@ -271,120 +289,28 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         "riesgo": resumen["riesgo"],
         "racha": resumen["racha"],
         "sin_datos": resumen["sin_datos"],
-        "recomendacion": {"texto": "Tomate 10 minutos para respirar y desconectarte."},
+        "recomendacion": {"texto": recomendacion_elegida},
         "calendario_semana": calendario_semana,
     }
     return render(request, "dashboard.html", contexto)
 
 
+@login_required
+def perfil(request):
+    from perfil.views import perfil as perfil_view
+    return perfil_view(request)
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 8. Vistas de secciones (previews)
+# 8. Vistas de secciones aún no fragmentadas
 # ─────────────────────────────────────────────────────────────────────────────
-@login_required(login_url="login_step1")
-def registro_diario(request: HttpRequest) -> HttpResponse:
-    return render(request, "registro_diario.html", {"active_section": "registro"})
-
-
-@login_required(login_url="login_step1")
-def calendario(request: HttpRequest) -> HttpResponse:
-    from calendario.view import _build_month_context
-    hoy = timezone.localdate()
-    anio = int(request.GET.get("anio", hoy.year))
-    mes = int(request.GET.get("mes", hoy.month))
-    start_day = request.GET.get("start_day", "monday")
-    contexto = {
-        "active_section": "calendario",
-        **_build_month_context(anio, mes, start_day, hoy),
-    }
-    return render(request, "calendario.html", contexto)
-
-
-@login_required(login_url="login_step1")
-def historial(request: HttpRequest) -> HttpResponse:
-    return render(request, "historial.html", {"active_section": "historial", "metricas": None})
-
-
-@login_required(login_url="login_step1")
-def recursos(request: HttpRequest) -> HttpResponse:
-    contexto = {
-        "active_section": "recursos",
-        "recursos": [
-            {
-                "titulo": "Termómetro de la Rabia",
-                "descripcion": "Identifica la intensidad de tu enojo en una escala visual para aprender a regularlo.",
-                "beneficio": "Autoconciencia emocional.",
-                "url": "/static/recursos/ejercicio1_termometro_rabia.pdf",
-                "externo": True,
-                "icono": "🌡️",
-            },
-            {
-                "titulo": "Disparadores de la Rabia",
-                "descripcion": "Reconoce las situaciones o pensamientos que activan tu enojo.",
-                "beneficio": "Prevención de crisis.",
-                "url": "/static/recursos/ejercicio2_disparadores_rabia.pdf",
-                "externo": True,
-                "icono": "⚡",
-            },
-            {
-                "titulo": "Cera de Conflictos",
-                "descripcion": "Técnica guiada para desescalar conflictos interpersonales.",
-                "beneficio": "Resolución pacífica.",
-                "url": "/static/recursos/ejercicio3_cera_conflictos.pdf",
-                "externo": True,
-                "icono": "🕊️",
-            },
-            {
-                "titulo": "Hoja de Fortalezas",
-                "descripcion": "Descubre y registra tus fortalezas personales para momentos difíciles.",
-                "beneficio": "Refuerzo de autoestima.",
-                "url": "/static/recursos/ejercicio4_hoja_fortalezas.pdf",
-                "externo": True,
-                "icono": "💪",
-            },
-            {
-                "titulo": "Partes de Mí",
-                "descripcion": "Explora las diferentes facetas de tu personalidad y cómo se relacionan.",
-                "beneficio": "Autoconocimiento integral.",
-                "url": "/static/recursos/ejercicio5_partes_de_mi.pdf",
-                "externo": True,
-                "icono": "🧩",
-            },
-            {
-                "titulo": "Autorretrato",
-                "descripcion": "Ejercicio creativo para representar cómo te ves y cómo te sientes.",
-                "beneficio": "Expresión emocional.",
-                "url": "/static/recursos/ejercicio6_autorretrato.pdf",
-                "externo": True,
-                "icono": "🎨",
-            },
-        ],
-        "lineas_atencion": [
-            {
-                "nombre": "Línea 106",
-                "telefono": "106",
-                "descripcion": "Atención en salud mental en Cali",
-                "horario": "24/7, gratuita desde fijos y celulares",
-            },
-            {
-                "nombre": "Psicóloga Daniela Soto",
-                "telefono": "+57 301 4646247",
-                "descripcion": "Psicoterapia presencial y remota",
-                "horario": "",
-            },
-            {
-                "nombre": "Casa Matria",
-                "telefono": "350 803 2031 (Diurno) / 311 612 0000 (24/7)",
-                "descripcion": "Atención a mujeres — Violencia de género",
-                "horario": "",
-            },
-        ],
-    }
-    return render(request, "recursos.html", contexto)
-
-
+# NOTA (reorganización modular):
+#   Las vistas `calendario`, `historial` y `recursos` se trasladaron a sus
+#   apps homónimas (calendario.views / historial.views / recursos.views).
+#   Aquí permanecen sólo `registro_diario` y `perfil_inicial`, pendientes de
+#   migrarse a `formulario/formulario_diario` y `formulario/formulario_inicial`.
 @login_required(login_url="login_step1")
 def perfil_inicial(request: HttpRequest) -> HttpResponse:
-    return render(request, "perfil_inicial.html", {"active_section": "perfil"})
+    return render(request, "perfil.html", {"active_section": "perfil"})
 
 
 # ─────────────────────────────────────────────────────────────────────────────

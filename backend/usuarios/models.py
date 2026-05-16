@@ -58,6 +58,12 @@ class CustomUser(AbstractUser):
         help_text="True cuando el usuario completo su evaluacion_inicial.",
     )
 
+    # ── Campos de perfil editable ──────────────────────────────────────────────
+    edad = models.IntegerField(null=True, blank=True)
+    estado_civil = models.CharField(max_length=50, blank=True, null=True)
+    en_tratamiento = models.CharField(max_length=10, blank=True, null=True)
+    detalle_tratamiento = models.TextField(blank=True, null=True)
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 

@@ -583,7 +583,7 @@ class Command(BaseCommand):
         parser.add_argument("csv_path",    type=str)
         parser.add_argument("--dry-run",   action="store_true", default=False)
         parser.add_argument("--batch-size", type=int, default=1000)
-        parser.add_argument("--audit-dir", type=str, default="./etl_auditorias")
+        parser.add_argument("--audit-dir", type=str, default="./postgres")
         parser.add_argument("--encoding",  type=str, default="utf-8")
         parser.add_argument("--delimiter", type=str, default=",")
 

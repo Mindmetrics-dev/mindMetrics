@@ -104,7 +104,10 @@
                 <p class="recommendation-card__body">
                     {{ recomendacion.texto|default:'Ve por un cafe, mereces un descanso' }}
                 </p>
-                <span class="recommendation-card__image" aria-hidden="true">&#9749;</span>
+                <img src="{% static 'img/taza_cafe.png' %}"
+                alt="Imagen ilustrativa de la recomendación"
+                class="recommendation-card__image"
+                aria-hidden="true">
             </div>
         </aside>
     </div>

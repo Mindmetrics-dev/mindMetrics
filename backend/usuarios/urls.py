@@ -28,10 +28,10 @@ urlpatterns = [
     path("", views.dashboard, name="home"),
 
     # ── Secciones de la app ──────────────────────────────────────────────────
+    # NOTA (reorganización modular): `calendario/`, `historial/` y `recursos/`
+    # se trasladaron a sus apps homónimas (calendario.urls / historial.urls /
+    # recursos.urls). Aquí quedan sólo las secciones aún no fragmentadas.
+    path('perfil/', views.perfil, name='perfil'),
     path("inicio/", views.dashboard, name="inicio"),
-    path("registro_diario/", views.registro_diario, name="registro_diario"),
-    path("calendario/", views.calendario, name="calendario"),
-    path("historial/", views.historial, name="historial"),
-    path("recursos/", views.recursos, name="recursos"),
     path("perfil_inicial/", views.perfil_inicial, name="perfil_inicial"),
 ]

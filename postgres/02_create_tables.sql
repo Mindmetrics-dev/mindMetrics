@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS registro_emocional (
     estres_financ_dia    INTEGER,
     apoyo_percibido_dia  TEXT,
     autocuidado          TEXT,
-    animo                TEXT
+    animo                INTEGER
 );
 
 CREATE TABLE IF NOT EXISTS recurso_apoyo (

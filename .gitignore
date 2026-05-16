@@ -58,3 +58,5 @@ htmlcov/
 .coverage.*
 .pytest_cache/
 .tox/
+
+.claude

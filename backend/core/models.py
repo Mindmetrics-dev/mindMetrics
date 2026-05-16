@@ -30,6 +30,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 # ─────────────────────────────────────────────────────────────────────────────
 
 class NivelRiesgoChoices(models.TextChoices):
+    MUY_BAJO = 'muy_bajo', 'Muy_Bajo'
     BAJO     = 'bajo',     'Bajo'
     MODERADO = 'moderado', 'Moderado'
     ALTO     = 'alto',     'Alto'
@@ -261,7 +262,8 @@ class RegistroEmocional(models.Model):
                                validators=[MinValueValidator(1), MaxValueValidator(10)])
     apoyo_percibido_dia  = models.TextField(null=True, blank=True)
     autocuidado          = models.TextField(null=True, blank=True)
-    animo                = models.TextField(null=True, blank=True)
+    animo                = models.IntegerField(null=True, blank=True,
+                               validators=[MinValueValidator(1), MaxValueValidator(10)])
 
     class Meta:
         managed             = False

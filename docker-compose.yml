@@ -42,7 +42,7 @@ services:
 
     container_name: mindmetrics_web_ia
     restart: always
-    working_dir: /app/backend
+    working_dir: /app
 
     command: >
       bash -c "

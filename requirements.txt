@@ -16,8 +16,6 @@ psycopg[binary]>=3.1.8
 # Nota: el backend activo usa python-decouple; python-dotenv y django-environ
 # estaban en la raíz anterior. Mantener los tres hasta migración completa.
 python-decouple==3.8
-python-dotenv==1.0.1
-django-environ==0.11.2
 
 # ─── Seguridad / Auth / 2FA ──────────────────────────────────────────────────
 django-otp>=1.5.4

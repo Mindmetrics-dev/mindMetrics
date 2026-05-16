@@ -40,9 +40,15 @@ INSTALLED_APPS = [
     "axes",
 
     # Apps del proyecto
-    "usuarios",
-    "formulario",
-    "core",
+    # ── Núcleo / dominio ──────────────────────────────────────────────────────
+    "core",          # esquema 3NF canónico (managed=False) — fuente única del DDL
+    # ── Apps de dominio / autenticación ───────────────────────────────────────
+    "usuarios",      # autenticación, 2FA y dashboard
+    "formulario",    # onboarding y evaluación inicial
+    # ── Apps modulares (capa MVT, sin tablas propias — consumen `core`) ───────
+    "calendario",    # calendario emocional mensual/semanal
+    "recursos",      # catálogo de recursos de apoyo + servido de PDFs
+    "historial",     # historial conductual y métricas de tendencia
 ]
 
 # ─── Middleware ───────────────────────────────────────────────────────────────
@@ -131,7 +137,7 @@ AXES_COOLOFF_TIME = timedelta(
 )
 AXES_LOCKOUT_PARAMETERS = ["ip_address", "username"]
 AXES_RESET_ON_SUCCESS = True
-AXES_LOCKOUT_TEMPLATE = "usuarios/locked_out.html"
+AXES_LOCKOUT_TEMPLATE = "locked_out.html"
 
 # ─── Localización ─────────────────────────────────────────────────────────────
 LANGUAGE_CODE = "es-co"
@@ -156,6 +162,11 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ─── Sesión: expiración por inactividad (30 minutos) ─────────────────────────
+SESSION_COOKIE_AGE = 1800          # 30 min en segundos
+SESSION_SAVE_EVERY_REQUEST = True  # reinicia el contador con cada request
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # persiste aunque se cierre el tab
 
 # ─── Seguridad (activar en producción cuando DEBUG=False) ─────────────────────
 if not DEBUG:

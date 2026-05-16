@@ -12,7 +12,7 @@
         <!-- Columnas 0-1: Recursos -->
         {% for recurso in recursos %}
             <article class="resource-card">
-                <span class="resource-card__icon">{{ recurso.icono }}</span>
+                <img src="{% static recurso.imagen %}" alt="{{ recurso.titulo }}" class="resource-card__icon">
                 <h3 class="resource-card__title">{{ recurso.titulo }}</h3>
 
                 <p class="resource-card__desc">{{ recurso.descripcion }}</p>
