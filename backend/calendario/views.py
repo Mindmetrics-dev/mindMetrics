@@ -77,24 +77,19 @@ def _formatear_registro(registro):
     }
 
 
-def _utc_naive_range(fecha_inicio, fecha_fin):
-    """Convierte un rango de fechas locales al rango naive-UTC para filtrar fecha_registro."""
-    inicio = timezone.make_aware(datetime.combine(fecha_inicio, dt_time.min))
-    fin    = timezone.make_aware(datetime.combine(fecha_fin,    dt_time.max))
-    return (
-        inicio.astimezone(timezone.utc).replace(tzinfo=None),
-        fin.astimezone(timezone.utc).replace(tzinfo=None),
-    )
-
-
 def _obtener_registros_por_fecha(fecha_inicio, fecha_fin, usuario=None):
-    """Mapa {date_local: RegistroEmocional} para el rango dado, filtrado por usuario."""
+    """Mapa {date_local: RegistroEmocional} para el rango dado, filtrado por usuario.
+
+    Usa datetimes aware (Bogota) para el __range; Django los convierte a UTC
+    antes de armar el SQL, lo que coincide con los valores naive-UTC almacenados.
+    """
     try:
-        inicio_utc, fin_utc = _utc_naive_range(fecha_inicio, fecha_fin)
+        inicio = timezone.make_aware(datetime.combine(fecha_inicio, dt_time.min))
+        fin    = timezone.make_aware(datetime.combine(fecha_fin,    dt_time.max))
         qs = (
             RegistroEmocional.objects
             .select_related('id_emocion')
-            .filter(fecha_registro__range=(inicio_utc, fin_utc))
+            .filter(fecha_registro__range=(inicio, fin))
             .order_by('fecha_registro')
         )
         if usuario is not None:

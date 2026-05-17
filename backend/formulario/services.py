@@ -55,27 +55,18 @@ class EvaluacionInicialFaltante(RegistroDiarioError):
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
 
-def _utc_naive_range(fecha: date):
-    """Convierte una fecha local (Bogota) al rango naive-UTC equivalente.
+def _ya_registro_en_fecha(usuario: Usuario, fecha: date) -> bool:
+    """True si el usuario ya tiene un RegistroEmocional en esa fecha local.
 
-    fecha_registro se almacena como UTC naive (auto_now_add + USE_TZ=True).
-    Usamos __range con valores UTC explícitos en lugar de __date para evitar
-    errores de interpretación de zona horaria sobre TIMESTAMP naive.
+    Usa datetimes aware (Bogota) para el __range: Django los convierte a UTC
+    correctamente al generar el SQL, evitando el RuntimeWarning y el desfase
+    de 5 horas que producían los datetimes naive pasados directamente.
     """
     inicio = timezone.make_aware(datetime.combine(fecha, dt_time.min))
     fin    = timezone.make_aware(datetime.combine(fecha, dt_time.max))
-    return (
-        inicio.astimezone(timezone.utc).replace(tzinfo=None),
-        fin.astimezone(timezone.utc).replace(tzinfo=None),
-    )
-
-
-def _ya_registro_en_fecha(usuario: Usuario, fecha: date) -> bool:
-    """True si el usuario ya tiene un RegistroEmocional en esa fecha local."""
-    inicio_utc, fin_utc = _utc_naive_range(fecha)
     return RegistroEmocional.objects.filter(
         id_usuario=usuario,
-        fecha_registro__range=(inicio_utc, fin_utc),
+        fecha_registro__range=(inicio, fin),
     ).exists()
 
 

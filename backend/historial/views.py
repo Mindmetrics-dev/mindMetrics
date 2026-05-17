@@ -7,7 +7,7 @@ Vista del historial: lista los registros emocionales del usuario
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from datetime import timezone as dt_tz
 
 from django.contrib.auth.decorators import login_required
@@ -77,7 +77,7 @@ def historial(request: HttpRequest) -> HttpResponse:
     dominio = getattr(request.user, "usuario_dominio", None)
 
     if dominio is not None:
-        desde = datetime.now() - timedelta(days=dias)
+        desde = timezone.now() - timedelta(days=dias)
         qs = (
             RegistroEmocional.objects
             .select_related("id_emocion")
