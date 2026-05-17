@@ -49,19 +49,27 @@
                         <tr>
                             <th>Fecha</th>
                             <th>Emoción predominante</th>
-                            <th>Nivel de riesgo (agente)</th>
+                            <th>Nivel de riesgo</th>
+                            <th>Hs. sueño</th>
+                            <th>Estrés laboral</th>
+                            <th>Estrés académico</th>
+                            <th>Estrés financiero</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for reg in registros %}
                         <tr>
                             <td>{{ reg.fecha|date:"d/m/Y" }}</td>
-                            <td>{{ reg.emocion }}</td>
+                            <td>{{ reg.emocion|capfirst }}</td>
                             <td>
                                 <span class="badge badge--{{ reg.nivel_clase }}">
                                     {{ reg.nivel_riesgo }}
                                 </span>
                             </td>
+                            <td>{% if reg.hr_sueno is not None %}{{ reg.hr_sueno }}h{% else %}—{% endif %}</td>
+                            <td>{% if reg.estres_laboral is not None %}{{ reg.estres_laboral }}/10{% else %}—{% endif %}</td>
+                            <td>{% if reg.estres_academico is not None %}{{ reg.estres_academico }}/10{% else %}—{% endif %}</td>
+                            <td>{% if reg.estres_financiero is not None %}{{ reg.estres_financiero }}/10{% else %}—{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

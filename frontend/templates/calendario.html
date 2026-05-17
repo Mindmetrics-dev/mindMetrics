@@ -65,7 +65,7 @@
                          aria-label="{{ dia.aria_label }}">
                         <span class="calendar__cell-number">{{ dia.numero }}</span>
                         {% if dia.estado_label %}
-                            <span class="calendar__cell-state">{{ dia.estado_label }}</span>
+                            <span class="calendar__cell-state">{{ dia.estado_label|capfirst }}</span>
                         {% elif not dia.es_otro_mes %}
                             <span class="calendar__cell-state calendar__cell-state--empty">Sin encuesta</span>
                         {% endif %}
@@ -85,17 +85,18 @@
             </div>
 
             <div class="activities-card">
-                <h2 class="activities-card__title">Mis actividades</h2>
-                {% if mis_actividades %}
-                    <ul class="activities-card__list">
-                        {% for actividad in mis_actividades %}
-                            <li class="activities-card__item">
-                                <strong>{{ actividad.hora }}</strong> &middot; {{ actividad.titulo }}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                <h2 class="activities-card__title">Actividades</h2>
+                {% if evaluacion_hoy %}
+                    <p class="activities-card__empty" style="color: var(--color-success, #16a34a); font-style: normal; font-weight: 600;">
+                        ✓ Evaluación de hoy completada
+                    </p>
                 {% else %}
-                    <p class="activities-card__empty">Sin actividades programadas para hoy.</p>
+                    <p class="activities-card__empty">
+                        Aún no realizaste tu evaluación diaria de hoy.
+                    </p>
+                    <a href="{% url 'registro_diario' %}" class="btn btn--primary" style="margin-top: var(--space-3); display:inline-block;">
+                        Realizar ahora →
+                    </a>
                 {% endif %}
             </div>
 

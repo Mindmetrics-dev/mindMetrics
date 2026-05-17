@@ -61,12 +61,12 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    # "django_otp.middleware.OTPMiddleware",  
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Gate de onboarding: fuerza /evaluacion-inicial/ en el primer ingreso.
     "usuarios.middleware.EvaluacionInicialRequiredMiddleware",
-    # "axes.middleware.AxesMiddleware",  # TODO: reactivar cuando auth real esté implementado
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "mi_plataforma.urls"
@@ -105,7 +105,7 @@ DATABASES = {
 # ─── Authentication backends ──────────────────────────────────────────────────
 # django-axes debe ir PRIMERO para interceptar intentos fallidos.
 AUTHENTICATION_BACKENDS = [
-    # "axes.backends.AxesStandaloneBackend",  # TODO: reactivar cuando auth real esté implementado
+    "axes.backends.AxesStandaloneBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 

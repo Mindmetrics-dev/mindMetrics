@@ -29,7 +29,7 @@ from django_otp.decorators import otp_required
 from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from .forms import Enroll2FAForm, LoginStep1Form, LoginStep2Form, SignupForm
+from .forms import Enroll2FAForm, LoginStep1Form, LoginStep2Form, PerfilForm, SignupForm
 
 User = get_user_model()
 
@@ -258,6 +258,24 @@ def logout_view(request: HttpRequest) -> HttpResponse:
 # ─────────────────────────────────────────────────────────────────────────────
 # 7. Dashboard protegido por 2FA
 # ─────────────────────────────────────────────────────────────────────────────
+_DIAS_ES   = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+_MESES_ES  = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+              'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+_RECOMENDACIONES = [
+    "Tómate 10 minutos para respirar y desconectarte.",
+    "Haz una pausa activa: levántate, estírate y camina 5 minutos.",
+    "Bebe un vaso de agua ahora mismo. La hidratación mejora el ánimo.",
+    "Escribe tres cosas por las que estás agradecido hoy.",
+    "Escucha tu canción favorita y concéntrate solo en la música.",
+    "Sal a tomar aire fresco por 5 minutos.",
+    "Apaga las notificaciones por una hora y concéntrate en una sola tarea.",
+    "Practica la respiración 4-7-8: inhala 4s, mantén 7s, exhala 8s.",
+    "Habla con alguien de confianza sobre cómo te sientes.",
+    "Date un momento para hacer algo que disfrutes, aunque sea breve.",
+]
+
+
 @login_required(login_url="login_step1", redirect_field_name="next")
 def dashboard(request: HttpRequest) -> HttpResponse:
     from calendario.views import _build_week_context, _get_dashboard_summary
@@ -266,39 +284,26 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     calendario_semana = _build_week_context(hoy, usuario_dominio)
     resumen = _get_dashboard_summary(hoy, usuario_dominio)
 
-    recomendaciones = [
-        "Tómate 10 minutos para respirar y desconectarte.",
-        "Haz una pausa activa: levántate, estírate y camina 5 minutos.",
-        "Bebe un vaso de agua ahora mismo. La hidratación mejora el ánimo.",
-        "Escribe tres cosas por las que estás agradecido hoy.",
-        "Escucha tu canción favorita y concéntrate solo en la música.",
-        "Sal a tomar aire fresco por 5 minutos.",
-        "Apaga las notificaciones por una hora y concéntrate en una sola tarea.",
-        "Practica la respiración 4-7-8: inhala 4s, mantén 7s, exhala 8s.",
-        "Habla con alguien de confianza sobre cómo te sientes.",
-        "Date un momento para hacer algo que disfrutes, aunque sea breve."
-    ]
-
-    recomendacion_elegida = random.choice(recomendaciones)
+    dia_es  = _DIAS_ES[hoy.weekday()]
+    mes_es  = _MESES_ES[hoy.month - 1]
+    semana  = hoy.isocalendar().week
+    fecha_fmt = f"{dia_es}, {hoy.day:02d} de {mes_es} — semana {semana}"
 
     contexto = {
         "active_section": "inicio",
         "usuario": request.user,
-        "fecha_hoy_formateada": timezone.now().strftime("%A, %d de %B - semana %W"),
+        "fecha_hoy_formateada": fecha_fmt,
         "estado_hoy": resumen["estado_hoy"],
         "riesgo": resumen["riesgo"],
         "racha": resumen["racha"],
         "sin_datos": resumen["sin_datos"],
-        "recomendacion": {"texto": recomendacion_elegida},
+        "recomendacion": {"texto": random.choice(_RECOMENDACIONES)},
         "calendario_semana": calendario_semana,
     }
     return render(request, "dashboard.html", contexto)
 
 
-@login_required
-def perfil(request):
-    from perfil.views import perfil as perfil_view
-    return perfil_view(request)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8. Vistas de secciones aún no fragmentadas
@@ -308,6 +313,60 @@ def perfil(request):
 #   apps homónimas (calendario.views / historial.views / recursos.views).
 #   Aquí permanecen sólo `registro_diario` y `perfil_inicial`, pendientes de
 #   migrarse a `formulario/formulario_diario` y `formulario/formulario_inicial`.
+def _eval_inicial(user):
+    """Devuelve la EvaluacionInicial más reciente del usuario, o None."""
+    from core.models import EvaluacionInicial
+    dominio = getattr(user, "usuario_dominio", None)
+    if dominio is None:
+        return None
+    return (
+        EvaluacionInicial.objects
+        .filter(id_usuario=dominio)
+        .order_by("-id_eval")
+        .first()
+    )
+
+
+@login_required(login_url="login_step1")
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def perfil(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        form = PerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            # Sync campos de EvaluacionInicial
+            from core.models import EvaluacionInicial
+            dominio = getattr(request.user, "usuario_dominio", None)
+            if dominio:
+                campos: dict = {}
+                if form.cleaned_data.get("edad") is not None:
+                    campos["edad"] = form.cleaned_data["edad"]
+                if form.cleaned_data.get("situacion_trabajo"):
+                    campos["situacion_trabajo"] = form.cleaned_data["situacion_trabajo"]
+                if form.cleaned_data.get("estado_civil"):
+                    campos["estado_relacion"] = form.cleaned_data["estado_civil"]
+                if campos:
+                    EvaluacionInicial.objects.filter(id_usuario=dominio).update(**campos)
+            messages.success(request, "Perfil actualizado correctamente.")
+            return redirect("perfil")
+    else:
+        eval_ini = _eval_inicial(request.user)
+        # Extra fields (genero, situacion_trabajo) are not on CustomUser so
+        # Django's ModelForm won't override them with instance data — initial works.
+        # For edad: pre-populate from EvaluacionInicial if CustomUser.edad is empty.
+        initial: dict = {}
+        if eval_ini:
+            if eval_ini.situacion_trabajo:
+                initial["situacion_trabajo"] = eval_ini.situacion_trabajo
+            if request.user.edad is None and eval_ini.edad is not None:
+                initial["edad"] = eval_ini.edad
+            if not request.user.estado_civil and eval_ini.estado_relacion:
+                initial["estado_civil"] = eval_ini.estado_relacion
+        form = PerfilForm(instance=request.user, initial=initial)
+    return render(request, "perfil.html", {"active_section": "perfil", "form": form})
+
+
 @login_required(login_url="login_step1")
 def perfil_inicial(request: HttpRequest) -> HttpResponse:
     return render(request, "perfil.html", {"active_section": "perfil"})

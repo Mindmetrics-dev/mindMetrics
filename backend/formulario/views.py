@@ -1,15 +1,13 @@
 """
 formulario/views.py — MindMetrics
+====================================
+Vistas de onboarding (evaluacion_inicial) y registro diario.
 
-Vista del onboarding obligatorio: evaluacion_inicial.
-
-Flujo:
+Flujo onboarding:
   signup -> enroll_2fa -> backup_codes -> evaluacion_inicial -> dashboard
-  ^                                       ^
-  Auto-crea usuario_dominio               Persiste EvaluacionInicial,
-                                          invoca agente/classifier.py,
-                                          crea RegistroEmocional inicial,
-                                          marca evaluacion_completada=True
+
+Flujo diario:
+  dashboard -> registro_diario -> historial (o recursos si riesgo alto/critico)
 """
 from __future__ import annotations
 
@@ -23,15 +21,28 @@ from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
+from django.utils import timezone
+
 from core.models import Emocion, RegistroEmocional, Usuario as UsuarioDominio
 from agente.classifier import evaluar_desde_evaluacion
-from .forms import EvaluacionInicialForm
+from . import services
+from .forms import EMOCION_CHOICES, EvaluacionInicialForm, RegistroDiarioForm
 
 logger = logging.getLogger(__name__)
 
-# Nombre de la emoción "semilla" que se crea junto al registro inicial.
-# Debe existir en la tabla `emocion` (o se crea con get_or_create).
 _EMOCION_EVALUACION = "Evaluación inicial"
+
+_NIVEL_LEGIBLE = {
+    "muy_bajo": "Muy Bajo",
+    "bajo":     "Bajo",
+    "moderado": "Moderado",
+    "alto":     "Alto",
+    "critico":  "Crítico",
+}
+
+_PSICOLOGA_CONTACTO = (
+    "Psicóloga Daniela Soto · +57 301 4646247 · Psicoterapia presencial y remota"
+)
 
 
 @login_required(login_url="login_step1")
@@ -112,4 +123,87 @@ def evaluacion_inicial(request: HttpRequest) -> HttpResponse:
         request,
         "evaluacion_inicial.html",
         {"form": form, "active_section": "perfil"},
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Registro diario
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required(login_url="login_step1")
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def registro_diario(request: HttpRequest) -> HttpResponse:
+    """
+    GET  — Muestra el formulario; bloquea si ya registró hoy.
+    POST — Valida, delega al service, y redirige.
+           Si el nivel es alto/crítico → recursos con alerta de contacto.
+    """
+    dominio = getattr(request.user, "usuario_dominio", None)
+    if dominio and services._ya_registro_en_fecha(dominio, timezone.localdate()):
+        messages.success(
+            request,
+            "Ya completaste tu registro diario de hoy. Aquí puedes ver tu estado actual. "
+            "O en historial verificar los datos registrados.",
+        )
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        form = RegistroDiarioForm(request.POST)
+        if form.is_valid():
+            try:
+                registro = services.submit_registro_diario(
+                    usuario_dominio=request.user.usuario_dominio,
+                    datos=form.cleaned_data,
+                )
+            except services.YaRegistroHoy:
+                messages.warning(request, "Ya registraste tu diario hoy. Vuelve mañana para registrar otro.")
+                return redirect("dashboard")
+            except services.EvaluacionInicialFaltante:
+                messages.error(request, "Necesitas completar tu evaluación inicial antes de registrar el diario.")
+                return redirect("evaluacion_inicial")
+            except Exception:
+                logger.exception("Error en el flujo de registro diario para usuario %s", request.user.pk)
+                messages.error(request, "Ocurrió un error al guardar tu registro. Inténtalo de nuevo.")
+                return redirect("registro_diario")
+
+            nivel = registro.nivel_riesgo or ""
+            etiqueta = _NIVEL_LEGIBLE.get(
+                nivel, nivel.replace("_", " ").title() if nivel else "Sin evaluar"
+            )
+
+            if nivel in ("alto", "critico"):
+                messages.error(
+                    request,
+                    f"⚠️ Tu nivel de riesgo es {etiqueta}. "
+                    f"Te recomendamos comunicarte con la {_PSICOLOGA_CONTACTO}.",
+                )
+                return redirect("recursos")
+
+            messages.success(request, f"Registro guardado. Nivel de riesgo: {etiqueta}.")
+            return redirect("historial")
+    else:
+        form = RegistroDiarioForm()
+
+    return render(
+        request,
+        "registro_diario.html",
+        {
+            "form": form,
+            "emociones_choices": EMOCION_CHOICES,
+            "active_section": "registro",
+        },
+    )
+
+
+@login_required(login_url="login_step1")
+@require_http_methods(["GET"])
+def resultado_diario(request: HttpRequest) -> HttpResponse:
+    resultado = request.session.pop("resultado_diario", None)
+    if not resultado:
+        return redirect("dashboard")
+    return render(
+        request,
+        "resultado_registro.html",
+        {"resultado": resultado, "active_section": "registro"},
     )

@@ -16,7 +16,8 @@ autenticado para aislar datos entre cuentas.
 from __future__ import annotations
 
 import calendar as pycalendar
-from datetime import date, timedelta
+from datetime import date, datetime, time as dt_time, timedelta
+from datetime import timezone as dt_tz
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
@@ -24,6 +25,18 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from .models import RegistroEmocional
+
+
+def _to_local_date(dt):
+    """Convierte datetime naive-UTC a fecha local (America/Bogota).
+
+    fecha_registro se guarda como UTC naive (auto_now_add con USE_TZ=True).
+    Llamar .date() directamente devuelve la fecha UTC; después de las 19:00
+    Bogota (= 00:00 UTC) el registro aparece en el día siguiente.
+    """
+    if dt is None:
+        return None
+    return timezone.localtime(dt.replace(tzinfo=dt_tz.utc)).date()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Constantes de localización
@@ -64,19 +77,30 @@ def _formatear_registro(registro):
     }
 
 
+def _utc_naive_range(fecha_inicio, fecha_fin):
+    """Convierte un rango de fechas locales al rango naive-UTC para filtrar fecha_registro."""
+    inicio = timezone.make_aware(datetime.combine(fecha_inicio, dt_time.min))
+    fin    = timezone.make_aware(datetime.combine(fecha_fin,    dt_time.max))
+    return (
+        inicio.astimezone(timezone.utc).replace(tzinfo=None),
+        fin.astimezone(timezone.utc).replace(tzinfo=None),
+    )
+
+
 def _obtener_registros_por_fecha(fecha_inicio, fecha_fin, usuario=None):
-    """Mapa {date: RegistroEmocional} para el rango dado, filtrado por usuario."""
+    """Mapa {date_local: RegistroEmocional} para el rango dado, filtrado por usuario."""
     try:
+        inicio_utc, fin_utc = _utc_naive_range(fecha_inicio, fecha_fin)
         qs = (
             RegistroEmocional.objects
             .select_related('id_emocion')
-            .filter(fecha_registro__date__range=(fecha_inicio, fecha_fin))
+            .filter(fecha_registro__range=(inicio_utc, fin_utc))
             .order_by('fecha_registro')
         )
         if usuario is not None:
             qs = qs.filter(id_usuario=usuario)
         return {
-            timezone.localdate(r.fecha_registro): r
+            _to_local_date(r.fecha_registro): r
             for r in qs
         }
     except Exception:
@@ -201,11 +225,17 @@ def _get_dashboard_summary(hoy, usuario=None):
     registros_por_fecha = _obtener_registros_por_fecha(hoy - timedelta(days=6), hoy, usuario)
     registro_hoy = registros_por_fecha.get(hoy)
 
+    dias_con_registro = sum(1 for r in registros_por_fecha.values() if r)
+    racha = {
+        'dias': dias_con_registro,
+        'hint': 'Registros en los últimos 7 días',
+    }
+
     if not registro_hoy:
         return {
             'estado_hoy': None,
             'riesgo': None,
-            'racha': None,
+            'racha': racha,
             'sin_datos': True,
         }
 
@@ -228,10 +258,7 @@ def _get_dashboard_summary(hoy, usuario=None):
             'severity': nivel_raw or 'warning',
             'hint': 'Calculado desde la encuesta de hoy',
         },
-        'racha': {
-            'dias': sum(1 for r in registros_por_fecha.values() if r),
-            'hint': 'Registros en los últimos 7 días',
-        },
+        'racha': racha,
         'sin_datos': False,
     }
 
@@ -262,8 +289,13 @@ def calendario(request: HttpRequest) -> HttpResponse:
 
     usuario = getattr(request.user, 'usuario_dominio', None)
 
+    evaluacion_hoy = bool(
+        _obtener_registros_por_fecha(hoy, hoy, usuario).get(hoy)
+    )
+
     contexto = {
         'active_section': 'calendario',
+        'evaluacion_hoy': evaluacion_hoy,
         **_build_month_context(anio, mes, start_day, hoy, usuario),
     }
     return render(request, 'calendario.html', contexto)

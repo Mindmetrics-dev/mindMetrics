@@ -94,6 +94,15 @@
 
     <main class="app-shell__main" role="main">
         <div class="container">
+            {% if messages %}
+                <div class="global-messages">
+                    {% for message in messages %}
+                        <div class="global-message global-message--{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
             {% block content %}{% endblock %}
         </div>
     </main>

@@ -59,4 +59,5 @@ htmlcov/
 .pytest_cache/
 .tox/
 
-.claude
+.claude/
+.git/

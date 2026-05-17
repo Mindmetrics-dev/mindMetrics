@@ -21,8 +21,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Capa de dependencias — se cachea si requirements.txt no cambia
-COPY backend/requirements.txt /app/backend/requirements.txt
-RUN pip install --upgrade pip && pip install -r /app/backend/requirements.txt
+COPY requirements.txt /app/requirements.txt
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
 # Copia diferida del código (la imagen final se construye en docker-compose con bind mount)
 COPY . /app
@@ -30,5 +30,5 @@ COPY . /app
 # Puerto Django por defecto
 EXPOSE 8000
 
-# El comando real lo define docker-compose.yml (migrate + ETL + runserver)
-CMD ["python", "/app/backend/manage.py", "runserver", "0.0.0.0:8000"]
+# Producción: gunicorn con 4 workers
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--chdir", "/app/backend", "mi_plataforma.wsgi:application"]

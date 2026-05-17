@@ -159,3 +159,76 @@ class LoginStep2Form(_TokenFormBase):
 
 class Enroll2FAForm(_TokenFormBase):
     """Confirmación inicial del TOTPDevice tras escanear el QR."""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Edición de perfil
+# ─────────────────────────────────────────────────────────────────────────────
+class PerfilForm(forms.ModelForm):
+    ESTADO_CIVIL_CHOICES = [
+        ("", "— Seleccionar —"),
+        ("soltero",     "Soltero/a"),
+        ("noviazgo",    "Noviazgo"),
+        ("union libre", "Union libre"),
+        ("casado",      "Casado/a"),
+        ("poliamor",    "Poliamor"),
+        ("divorciado",  "Divorciado/a"),
+        ("viudo",       "Viudo/a"),
+    ]
+    EN_TRATAMIENTO_CHOICES = [
+        ("", "— Seleccionar —"),
+        ("si", "Sí"),
+        ("no", "No"),
+    ]
+    GENERO_CHOICES = [
+        ("", "— Seleccionar —"),
+        ("femenino",   "Femenino"),
+        ("masculino",  "Masculino"),
+        ("no_binario", "No binario"),
+        ("otro",       "Otro"),
+    ]
+    SITUACION_TRABAJO_CHOICES = [
+        ("", "— Seleccionar —"),
+        ("estudiante",               "Estudiante"),
+        ("empleado tiempo completo", "Empleado tiempo completo"),
+        ("empleado medio tiempo",    "Empleado medio tiempo"),
+        ("independiente",            "Independiente"),
+        ("contrato temporal",        "Contrato temporal"),
+        ("desempleado",              "Desempleado/a"),
+        ("pensionado",               "Pensionado/a"),
+    ]
+
+    estado_civil = forms.ChoiceField(
+        choices=ESTADO_CIVIL_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-group__input"}),
+    )
+    en_tratamiento = forms.ChoiceField(
+        choices=EN_TRATAMIENTO_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-group__input"}),
+    )
+    # Extra fields from EvaluacionInicial (not on CustomUser model)
+    situacion_trabajo = forms.ChoiceField(
+        choices=SITUACION_TRABAJO_CHOICES,
+        required=False,
+        label="Situación laboral",
+        widget=forms.Select(attrs={"class": "form-group__input"}),
+    )
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "edad", "estado_civil", "en_tratamiento", "detalle_tratamiento")
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "form-group__input"}),
+            "email": forms.EmailInput(attrs={"class": "form-group__input"}),
+            "edad": forms.NumberInput(attrs={"class": "form-group__input", "min": 1, "max": 120}),
+            "detalle_tratamiento": forms.Textarea(attrs={"class": "form-group__input", "rows": 3}),
+        }
+
+    def clean_email(self) -> str:
+        email = self.cleaned_data["email"].lower().strip()
+        qs = User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Ya existe un usuario con este correo.")
+        return email

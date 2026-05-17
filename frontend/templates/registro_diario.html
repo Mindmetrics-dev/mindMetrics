@@ -90,11 +90,20 @@
 
             {# --- Bloque 3: Interacción y ánimo --- #}
             <div class="form-group">
-                <label for="id_interaccion_social" class="form-group__label">En una escala de 1 a 10, donde 1 es ninguna interacción y 10 es mucha interacción, ¿Qué tanta interacción tuviste hoy con tu círculo cercano?</label>
-                <input type="number" min="1" max="10"
-                       id="id_interaccion_social" name="interaccion_social"
-                       class="form-group__input" placeholder="Escribe..."
-                       value="{{ form.interaccion_social.value|default_if_none:'' }}" required>
+                <label class="form-group__label">¿Tuviste interacción con tu círculo cercano hoy?</label>
+                <div class="form-radio-group">
+                    <label class="form-radio-label">
+                        <input type="radio" name="interaccion_social" value="si"
+                               {% if form.interaccion_social.value == "si" %}checked{% endif %} required>
+                        Sí
+                    </label>
+                    <label class="form-radio-label">
+                        <input type="radio" name="interaccion_social" value="no"
+                               {% if form.interaccion_social.value == "no" %}checked{% endif %}>
+                        No
+                    </label>
+                </div>
+                {% if form.interaccion_social.errors %}<span class="form-group__error">{{ form.interaccion_social.errors.0 }}</span>{% endif %}
             </div>
 
             <div class="form-group">
@@ -107,11 +116,20 @@
 
             {# --- Bloque 4: Cualitativos --- #}
             <div class="form-group">
-                <label for="id_autocuidado" class="form-group__label">¿Realizaste alguna actividad de autocuidado hoy?</label>
-                <input type="text"
-                       id="id_autocuidado" name="autocuidado"
-                       class="form-group__input" placeholder="Escribe..."
-                       value="{{ form.autocuidado.value|default_if_none:'' }}" required>
+                <label class="form-group__label">¿Realizaste alguna actividad de autocuidado hoy?</label>
+                <div class="form-radio-group">
+                    <label class="form-radio-label">
+                        <input type="radio" name="autocuidado" value="si"
+                               {% if form.autocuidado.value == "si" %}checked{% endif %} required>
+                        Sí
+                    </label>
+                    <label class="form-radio-label">
+                        <input type="radio" name="autocuidado" value="no"
+                               {% if form.autocuidado.value == "no" %}checked{% endif %}>
+                        No
+                    </label>
+                </div>
+                {% if form.autocuidado.errors %}<span class="form-group__error">{{ form.autocuidado.errors.0 }}</span>{% endif %}
             </div>
 
             <div class="form-group">

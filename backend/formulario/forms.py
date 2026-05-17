@@ -207,7 +207,80 @@ class EvaluacionInicialForm(forms.ModelForm):
         "historial_panico", "historial_familiar",
     }
 
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             field.required = name in self.CAMPOS_REQUERIDOS
+
+EMOCION_CHOICES = [
+    ("miedo",    "Miedo"),
+    ("tristeza", "Tristeza"),
+    ("ira",      "Ira"),
+    ("alegria",  "Alegría"),
+    ("sorpresa", "Sorpresa"),
+    ("asco",     "Asco"),
+]
+
+_SI_NO = [("si", "Sí"), ("no", "No")]
+
+class RegistroDiarioForm(forms.Form):
+    """
+    Formulario del registro diario.
+
+    No es ModelForm porque el service resuelve la FK Emocion y hace
+    los mapeos necesarios. Los nombres de campo coinciden con el template.
+    """
+    # ── Hábitos (horas) ──────────────────────────────────────────────────────
+    horas_sueno = forms.FloatField(
+        min_value=0, max_value=24, required=True,
+        label="¿Cuántas horas dormiste hoy?",
+    )
+    horas_trabajo_estudio = forms.FloatField(
+        min_value=0, max_value=24, required=True,
+        label="¿Cuántas horas trabajaste o estudiaste hoy?",
+    )
+    horas_pantallas = forms.FloatField(
+        min_value=0, max_value=24, required=True,
+        label="¿Cuántas horas pasaste frente a pantallas hoy?",
+    )
+    horas_actividad_fisica = forms.FloatField(
+        min_value=0, max_value=24, required=True,
+        label="¿Cuántas horas realizaste actividad física hoy?",
+    )
+
+    # ── Estrés (escalas 1-10) ─────────────────────────────────────────────────
+    estres_laboral = forms.IntegerField(
+        min_value=1, max_value=10, required=True,
+        label="Nivel de estrés laboral hoy",
+    )
+    estres_academico = forms.IntegerField(
+        min_value=1, max_value=10, required=True,
+        label="Nivel de estrés académico hoy",
+    )
+    estres_financiero = forms.IntegerField(
+        min_value=1, max_value=10, required=True,
+        label="Nivel de estrés financiero hoy",
+    )
+
+    # ── Interacción y ánimo ───────────────────────────────────────────────────
+    interaccion_social = forms.ChoiceField(
+        choices=_SI_NO, required=True,
+        label="¿Tuviste interacción con tu círculo cercano hoy?",
+        widget=forms.RadioSelect(),
+    )
+    animo = forms.IntegerField(
+        min_value=1, max_value=10, required=True,
+        label="Estado de ánimo hoy",
+    )
+
+    # ── Cualitativos ─────────────────────────────────────────────────────────
+    autocuidado = forms.ChoiceField(
+        choices=_SI_NO, required=True,
+        label="¿Realizaste alguna actividad de autocuidado hoy?",
+        widget=forms.RadioSelect(),
+    )
+    emocion_predominante = forms.ChoiceField(
+        choices=EMOCION_CHOICES, required=True,
+        label="¿Qué emoción predominó durante el día?",
+    )
