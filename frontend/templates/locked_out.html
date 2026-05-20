@@ -1,0 +1,14 @@
+{% extends 'mindmetrics/auth_base.html' %}
+
+{% block title %}MindMetrics — Cuenta bloqueada temporalmente{% endblock %}
+
+{% block auth_content %}
+<h1 class="auth-card__title">Acceso bloqueado</h1>
+<p class="auth-card__subtitle">
+    Has superado el número máximo de intentos fallidos. Tu acceso está bloqueado
+    temporalmente por seguridad. Intenta de nuevo en unos minutos.
+</p>
+<p class="auth-card__alt">
+    Si crees que esto es un error, contacta al administrador.
+</p>
+{% endblock %}

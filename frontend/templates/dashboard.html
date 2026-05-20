@@ -1,0 +1,116 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+{% block title %}Inicio - MindMetrics{% endblock %}
+
+{% block content %}
+
+    {# ── Cabecera ──────────────────────────────────────────────────────────── #}
+    <header class="dashboard-header">
+        <div>
+            <h1 class="dashboard-header__greeting">
+                Hola, <strong>{{ usuario.username|default:'Usuario' }}</strong>
+            </h1>
+            <p class="dashboard-header__date">{{ fecha_hoy_formateada }}</p>
+        </div>
+        <a href="{% url 'registro_diario' %}" class="btn btn--primary">
+            + Registrar Estado
+        </a>
+    </header>
+
+    {# ── Aviso si no hay encuesta hoy ─────────────────────────────────────── #}
+    {% if sin_datos %}
+    <div class="dashboard-cta">
+        <span class="dashboard-cta__icon">📋</span>
+        <p class="dashboard-cta__text">
+            Aún no registraste tu estado de hoy.
+            <a href="{% url 'registro_diario' %}" class="dashboard-cta__link">Hacerlo ahora →</a>
+        </p>
+    </div>
+    {% endif %}
+
+    {# ── Tarjetas de métricas ─────────────────────────────────────────────── #}
+    <section class="grid grid--metrics-3" aria-label="Métricas del día">
+
+        <article class="metric-card {% if sin_datos %}metric-card--muted{% endif %}">
+            <h2 class="metric-card__label">Estado de hoy</h2>
+            {% if sin_datos %}
+                <p class="metric-card__value metric-card__value--muted">—</p>
+                <p class="metric-card__hint">Sin encuesta hoy</p>
+            {% else %}
+                <p class="metric-card__value metric-card__value--success">
+                    {{ estado_hoy.label|default:'Estable'|capfirst }}
+                </p>
+                <p class="metric-card__hint">{{ estado_hoy.hint }}</p>
+            {% endif %}
+        </article>
+
+        <article class="metric-card {% if sin_datos %}metric-card--muted{% endif %}">
+            <h2 class="metric-card__label">Riesgo estimado</h2>
+            {% if sin_datos %}
+                <p class="metric-card__value metric-card__value--muted">—</p>
+                <p class="metric-card__hint">Completa la encuesta de hoy</p>
+            {% else %}
+                <p class="metric-card__value metric-card__value--{{ riesgo.severity|default:'warning' }}">
+                    {{ riesgo.label|default:'Moderado' }}
+                </p>
+                <p class="metric-card__hint">{{ riesgo.hint }}</p>
+            {% endif %}
+        </article>
+
+        <article class="metric-card">
+            <h2 class="metric-card__label">Racha de registros</h2>
+            {% if racha.dias > 0 %}
+                <p class="metric-card__value metric-card__value--success">
+                    {{ racha.dias }} {% if racha.dias == 1 %}día{% else %}días{% endif %}
+                </p>
+            {% else %}
+                <p class="metric-card__value metric-card__value--muted">0 días</p>
+            {% endif %}
+            <p class="metric-card__hint">{{ racha.hint }}</p>
+        </article>
+
+    </section>
+
+    {# ── Semana + Recomendación ────────────────────────────────────────────── #}
+    <section class="grid grid--dashboard-main" style="margin-top: var(--space-8);">
+
+        <div>
+            <p class="section-label">{{ calendario_semana.titulo }}</p>
+            <p class="calendar__subtitle">{{ calendario_semana.subtitulo }}</p>
+
+            <div class="calendar calendar--compact">
+                <div class="calendar__grid calendar__grid--week" role="grid">
+                    {% for dia in calendario_semana.dias %}
+                        <div class="calendar__cell
+                                    calendar__cell--{{ dia.estado_clase }}
+                                    {% if dia.es_hoy %}calendar__cell--today{% endif %}"
+                             role="gridcell"
+                             aria-label="{{ dia.dia_corto }} {{ dia.numero }}">
+                            <span class="calendar__day-name">{{ dia.dia_corto }}</span>
+                            <span class="calendar__cell-number">{{ dia.numero }}</span>
+                            {% if dia.estado_label %}
+                                <span class="calendar__cell-state">{{ dia.estado_label }}</span>
+                            {% else %}
+                                <span class="calendar__cell-state calendar__cell-state--empty">Sin encuesta</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <aside class="recommendation-card" aria-label="Recomendación del día">
+            <h3 class="recommendation-card__title">Recomendación de hoy</h3>
+            <p class="recommendation-card__body">
+                {{ recomendacion.texto }}
+            </p>
+            <img src="{% static 'img/taza_cafe.png' %}"
+                 alt=""
+                 class="recommendation-card__image"
+                 aria-hidden="true">
+        </aside>
+
+    </section>
+
+{% endblock %}

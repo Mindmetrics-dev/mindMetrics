@@ -1,0 +1,113 @@
+{% extends 'mindmetrics/auth_base.html' %}
+{% load static %}
+
+{% block title %}Consentimiento Informado - MindMetrics{% endblock %}
+
+{% block auth_brand %}{% endblock %}
+
+{% block auth_content %}
+    <h1 class="auth-card__brand-title">Mind<span>Metrics</span></h1>
+    <h2 class="auth-card__title">Consentimiento Informado</h2>
+    <p class="auth-card__subtitle">Lea cuidadosamente antes de continuar con el registro.</p>
+
+    <div class="consent-body">
+        <h3>Consentimiento Informado y Autorizaci&oacute;n de Tratamiento de Datos Personales</h3>
+        <p class="consent-meta">&Uacute;ltima actualizaci&oacute;n: Mayo de 2026</p>
+
+        <p>Bienvenido(a) a MindMetrics.</p>
+        <p>Antes de registrarse y utilizar esta plataforma, usted debe leer cuidadosamente el presente consentimiento informado y la autorizaci&oacute;n para el tratamiento de datos personales. El uso de la plataforma implica que usted comprende y acepta las condiciones aqu&iacute; descritas.</p>
+
+        <h4>1. Naturaleza y finalidad de la plataforma</h4>
+        <p>MindMetrics es una plataforma digital orientada al monitoreo personal y la autoobservaci&oacute;n de variables emocionales y conductuales mediante registros voluntarios realizados por el usuario.</p>
+        <p>La plataforma tiene fines exclusivamente informativos, preventivos, educativos y de apoyo al bienestar emocional.</p>
+        <p><strong>MindMetrics NO constituye un servicio m&eacute;dico, psicol&oacute;gico, psiqui&aacute;trico o terap&eacute;utico.</strong></p>
+        <p>La plataforma:</p>
+        <ul>
+            <li>No realiza diagn&oacute;sticos cl&iacute;nicos</li>
+            <li>No emite conceptos profesionales de salud mental</li>
+            <li>No reemplaza atenci&oacute;n psicol&oacute;gica, psiqui&aacute;trica o m&eacute;dica</li>
+            <li>No realiza intervenci&oacute;n terap&eacute;utica</li>
+            <li>No mantiene seguimiento cl&iacute;nico profesional</li>
+            <li>No activa protocolos autom&aacute;ticos de emergencia</li>
+            <li>No establece relaci&oacute;n profesional-paciente entre el usuario y los desarrolladores o administradores de la plataforma</li>
+        </ul>
+        <p>Los resultados, retroalimentaciones, indicadores, patrones o recomendaciones generadas por la plataforma deben interpretarse &uacute;nicamente como orientaci&oacute;n general y no como conclusiones cl&iacute;nicas definitivas.</p>
+
+        <h4>2. Procedimientos y funcionamiento</h4>
+        <p>Al utilizar la plataforma, el usuario podr&aacute; realizar actividades como:</p>
+        <ul>
+            <li>Diligenciamiento de una evaluaci&oacute;n inicial</li>
+            <li>Registro emocional diario o peri&oacute;dico</li>
+            <li>Consulta de recursos informativos y preventivos relacionados con bienestar y salud mental</li>
+            <li>Visualizaci&oacute;n de m&eacute;tricas, tendencias o retroalimentaciones derivadas de la informaci&oacute;n suministrada</li>
+        </ul>
+        <p>La informaci&oacute;n procesada depende exclusivamente de los datos proporcionados por el usuario y puede no reflejar con precisi&oacute;n su estado psicol&oacute;gico real.</p>
+
+        <h4>3. Riesgos y limitaciones</h4>
+        <p>El usuario comprende y acepta que el uso de la plataforma puede implicar ciertas limitaciones o riesgos, entre ellos:</p>
+        <ul>
+            <li>Identificaci&oacute;n de patrones emocionales o conductuales que puedan generar incomodidad, preocupaci&oacute;n o malestar emocional</li>
+            <li>Interpretaciones subjetivas o incorrectas de los resultados por parte del usuario</li>
+            <li>Limitaciones t&eacute;cnicas, estad&iacute;sticas o metodol&oacute;gicas inherentes a sistemas digitales de apoyo</li>
+            <li>Posibilidad de que las recomendaciones o retroalimentaciones no sean aplicables a todos los contextos personales</li>
+        </ul>
+        <p>El usuario entiende que la plataforma no cuenta con monitoreo profesional en tiempo real ni con intervenci&oacute;n psicol&oacute;gica activa.</p>
+        <p>En caso de crisis emocional, riesgo para s&iacute; mismo o terceros, pensamientos suicidas, situaciones de violencia o cualquier emergencia relacionada con salud mental, el usuario deber&aacute; acudir inmediatamente a l&iacute;neas oficiales de emergencia, servicios m&eacute;dicos, centros de atenci&oacute;n psicol&oacute;gica o profesionales de salud mental debidamente autorizados.</p>
+
+        <h4>4. Voluntariedad del uso</h4>
+        <p>El uso de la plataforma es completamente voluntario. El usuario podr&aacute; dejar de utilizar la plataforma en cualquier momento, cerrar su cuenta y solicitar eliminaci&oacute;n de sus datos conforme a la legislaci&oacute;n aplicable, sin que ello genere sanciones, penalidades o consecuencias negativas.</p>
+
+        <h4>5. Tratamiento de datos personales</h4>
+        <p>En cumplimiento de la Ley 1581 de 2012, el Decreto 1377 de 2013 y dem&aacute;s normas concordantes de la Rep&uacute;blica de Colombia, el usuario autoriza de manera libre, previa, expresa e informada el tratamiento de sus datos personales.</p>
+        <p>La informaci&oacute;n recolectada podr&aacute; incluir:</p>
+        <ul>
+            <li>Datos de identificaci&oacute;n y contacto</li>
+            <li>Respuestas relacionadas con estados emocionales</li>
+            <li>H&aacute;bitos de registro</li>
+            <li>M&eacute;tricas derivadas del uso de la plataforma</li>
+            <li>Informaci&oacute;n considerada sensible conforme a la legislaci&oacute;n colombiana</li>
+        </ul>
+        <p>Los datos ser&aacute;n utilizados &uacute;nicamente para funcionamiento de la plataforma, generaci&oacute;n de retroalimentaci&oacute;n personalizada, almacenamiento y visualizaci&oacute;n hist&oacute;rica de registros, mejora t&eacute;cnica y funcional del sistema, y fines acad&eacute;micos, estad&iacute;sticos o de investigaci&oacute;n mediante anonimizaci&oacute;n o agregaci&oacute;n de datos.</p>
+        <p>La informaci&oacute;n no ser&aacute; comercializada ni compartida con terceros no autorizados, salvo obligaci&oacute;n legal, proveedores tecnol&oacute;gicos bajo deberes de confidencialidad, o autorizaci&oacute;n expresa del titular.</p>
+
+        <h4>6. Datos sensibles</h4>
+        <p>El usuario comprende que algunos datos tratados por la plataforma pueden ser considerados datos sensibles conforme a la legislaci&oacute;n colombiana, particularmente aquellos relacionados con estados emocionales, bienestar psicol&oacute;gico o informaci&oacute;n personal de car&aacute;cter &iacute;ntimo. El suministro de estos datos es voluntario.</p>
+
+        <h4>7. Derechos del titular de los datos</h4>
+        <p>El usuario podr&aacute; ejercer en cualquier momento sus derechos de conocer, actualizar, rectificar, solicitar eliminaci&oacute;n, revocar la autorizaci&oacute;n, solicitar prueba del consentimiento otorgado, y presentar consultas o reclamos relacionados con sus datos personales.</p>
+
+        <h4>8. Seguridad de la informaci&oacute;n</h4>
+        <p>MindMetrics implementar&aacute; medidas razonables de seguridad administrativas, t&eacute;cnicas y digitales para proteger la informaci&oacute;n. No obstante, el usuario entiende que ning&uacute;n sistema tecnol&oacute;gico es completamente invulnerable.</p>
+
+        <h4>9. Restricci&oacute;n de edad</h4>
+        <p>La plataforma est&aacute; dirigida exclusivamente a personas mayores de edad entre los 18 y 36 a&ntilde;os.</p>
+
+        <h4>10. Exenci&oacute;n de responsabilidad</h4>
+        <p>El usuario reconoce y acepta que los resultados de la plataforma no equivalen a diagn&oacute;stico cl&iacute;nico, ninguna recomendaci&oacute;n sustituye valoraci&oacute;n profesional, y las decisiones personales tomadas a partir de la informaci&oacute;n mostrada son responsabilidad exclusiva del usuario.</p>
+
+        <h4>11. Declaraci&oacute;n de consentimiento</h4>
+        <p>Al hacer clic en &laquo;Acepto y continuar&raquo;, usted declara que:</p>
+        <ul>
+            <li>Ha le&iacute;do integralmente este consentimiento informado</li>
+            <li>Comprende la finalidad y limitaciones de la plataforma</li>
+            <li>Entiende que la herramienta no presta servicios cl&iacute;nicos ni diagn&oacute;sticos</li>
+            <li>Comprende los posibles riesgos y alcances del uso</li>
+            <li>Autoriza el tratamiento de sus datos personales conforme a la legislaci&oacute;n colombiana</li>
+            <li>Entiende que puede retirarse o eliminar su cuenta en cualquier momento</li>
+            <li>Acepta voluntariamente utilizar la plataforma MindMetrics</li>
+        </ul>
+    </div>
+
+    <form method="post" action="{% url 'consentimiento' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top: var(--space-4);">
+            Acepto y continuar al registro
+        </button>
+    </form>
+{% endblock %}
+
+{% block auth_footer %}
+    <p class="auth-card__footer" style="color: var(--color-text); margin-top: var(--space-6);">
+        <a href="{% url 'login_step1' %}" class="auth-card__footer-link">Volver al inicio de sesi&oacute;n</a>
+    </p>
+{% endblock %}

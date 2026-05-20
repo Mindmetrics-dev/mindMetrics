@@ -1,40 +1,97 @@
 version: '3.8'
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MindMetrics — docker-compose.yml
+# ═══════════════════════════════════════════════════════════════════════════════
+
 services:
 
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
   db:
     image: postgres:15
     container_name: mindmetrics_db
     restart: always
+
     env_file:
-      - .env
+      - backend/.env
+
+    environment:
+      POSTGRES_DB: ${DB_NAME:-mi_plataforma}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-clave123}
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./.docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01_domain_tables.sql:ro
+
     networks:
       - mindmetrics_net
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+
+  # ── Django ──────────────────────────────────────────────────────────────────
   web_ia:
     build:
       context: .
-      dockerfile: .docker/django/Dockerfile
+      dockerfile: docker/django/Dockerfile
+
     container_name: mindmetrics_web_ia
     restart: always
+    working_dir: /app
+
     command: >
-      bash -c "sleep 5 && 
-               python manage.py runserver 0.0.0.0:8000"
+      bash -c "
+        echo '[startup] ── 1/4 Aplicando migraciones Django...' &&
+        python manage.py migrate --noinput &&
+
+        echo '[startup] ── 2/4 Creando/verificando tablas de dominio...' &&
+        python manage.py create_domain_tables \
+          --sql-path /app/postgres/02_create_tables.sql &&
+
+        echo '[startup] ── 3/4 Cargando Dataset.csv...' &&
+        python manage.py load_csv_normalized \
+          --path /app/postgres/Dataset.csv \
+          --batch-size 500 \
+          || echo '[startup] ADVERTENCIA: ETL omitido (ver logs/).' &&
+
+        echo '[startup] ── 4/4 Iniciando servidor Django...' &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+
     env_file:
-      - .env
+      - backend/.env
+
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-preview-key-cambiar-en-produccion}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      OTP_TOTP_ISSUER: ${OTP_TOTP_ISSUER:-MindMetrics}
+      AXES_FAILURE_LIMIT: ${AXES_FAILURE_LIMIT:-5}
+      AXES_COOLOFF_MINUTES: ${AXES_COOLOFF_MINUTES:-15}
+
     volumes:
       - .:/app
+      - ./logs:/app/logs
+      - ./reports:/app/reports
+
     ports:
-      - "8000:8000"    
-      - "443:443"    
+      - "8000:8000"
+      - "443:443"
+
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
     networks:
       - mindmetrics_net
+
 networks:
   mindmetrics_net:
-    driver: bridge 
+    driver: bridge
 
 volumes:
   postgres_data:

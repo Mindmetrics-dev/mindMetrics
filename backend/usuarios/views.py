@@ -1,0 +1,429 @@
+"""
+usuarios/views.py — Vistas de autenticación, 2FA y dashboard.
+
+Flujo:
+    signup → enroll_2fa → backup_codes → dashboard
+    login_step1 → (si 2FA activo) login_step2 → dashboard
+                  (si no)        → dashboard
+
+Cumple con ADR-001-2FA-TOTP §6 Fase 4.
+"""
+from __future__ import annotations
+
+import base64
+import secrets
+from io import BytesIO
+import random
+
+import qrcode
+from django.contrib import messages
+from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
+from django_otp.decorators import otp_required
+from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
+from django_otp.plugins.otp_totp.models import TOTPDevice
+
+from .forms import Enroll2FAForm, LoginStep1Form, LoginStep2Form, PerfilForm, SignupForm
+
+User = get_user_model()
+
+# Clave de sesión para el ID de usuario que pasó la etapa 1 del login.
+PENDING_2FA_KEY = "pending_2fa_user_id"
+
+# Cantidad de backup codes (PSP §F4).
+BACKUP_CODES_COUNT = 8
+BACKUP_CODE_BYTES = 5  # secrets.token_hex(5) → 10 hex chars
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 0. Consentimiento informado
+# ─────────────────────────────────────────────────────────────────────────────
+CONSENT_SESSION_KEY = "consentimiento_aceptado"
+
+
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def consentimiento(request: HttpRequest) -> HttpResponse:
+    """Muestra el consentimiento informado. Solo al aceptar se habilita el registro."""
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        request.session[CONSENT_SESSION_KEY] = True
+        return redirect("register")
+
+    return render(request, "consentimiento.html")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. Registro
+# ─────────────────────────────────────────────────────────────────────────────
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def signup(request: HttpRequest) -> HttpResponse:
+    """Alta de usuario. Tras éxito, login automático y redirección a enrolamiento 2FA."""
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    if not request.session.get(CONSENT_SESSION_KEY):
+        return redirect("consentimiento")
+
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Login sin 2FA aún — la fuerza del 2FA se ejerce vía @otp_required en dashboard.
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            messages.info(request, "Cuenta creada. Configura ahora tu autenticación de dos factores.")
+            return redirect("enroll_2fa")
+    else:
+        form = SignupForm()
+
+    return render(request, "register.html", {"form": form})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. Enrolamiento TOTP
+# ─────────────────────────────────────────────────────────────────────────────
+@login_required
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def enroll_2fa(request: HttpRequest) -> HttpResponse:
+    """
+    GET  — Genera (o reutiliza) TOTPDevice no confirmado y muestra QR + secreto.
+    POST — Verifica el primer token; si es válido, marca el device como confirmado.
+
+    Reglas anti-duplicado:
+      1. Si ya existe un TOTPDevice confirmado, no se re-enrola: se redirige.
+      2. Si quedo basura (varios unconfirmed de sesiones previas), se limpia
+         dejando solo uno.
+    """
+    # (1) Si ya hay un device confirmado, no permitir un nuevo enroll.
+    if TOTPDevice.objects.filter(user=request.user, confirmed=True).exists():
+        messages.info(request, "Tu 2FA ya esta habilitado.")
+        return redirect("dashboard")
+
+    # (2) Limpiar duplicados unconfirmed: dejar solo el mas reciente.
+    unconfirmed = TOTPDevice.objects.filter(
+        user=request.user, confirmed=False
+    ).order_by("-id")
+    if unconfirmed.count() > 1:
+        # conservar el primero (mas reciente), borrar el resto
+        unconfirmed.exclude(pk=unconfirmed.first().pk).delete()
+
+    device, _ = TOTPDevice.objects.get_or_create(
+        user=request.user,
+        name="default",
+        confirmed=False,
+    )
+
+    if request.method == "POST":
+        form = Enroll2FAForm(request.POST)
+        if form.is_valid():
+            token = form.cleaned_data["token"]
+            if device.verify_token(token):
+                device.confirmed = True
+                device.save(update_fields=["confirmed"])
+                request.user.is_2fa_enabled = True
+                request.user.email_verified_at = timezone.now()
+                request.user.save(update_fields=["is_2fa_enabled", "email_verified_at"])
+                messages.success(request, "2FA habilitado correctamente.")
+                return redirect("backup_codes")
+            form.add_error("token", "El código no es válido o ya expiró.")
+    else:
+        form = Enroll2FAForm()
+
+    qr_b64 = _build_qr_base64(device.config_url)
+    return render(
+        request,
+        "enroll_2fa.html",
+        {
+            "form": form,
+            "qr_image": qr_b64,
+            "secret": device.key,
+            "user": request.user,
+        },
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. Backup codes
+# ─────────────────────────────────────────────────────────────────────────────
+@login_required
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def backup_codes(request: HttpRequest) -> HttpResponse:
+    """
+    Genera 8 códigos de respaldo de un solo uso al confirmar 2FA.
+    Se muestran UNA sola vez. POST confirma que el usuario los guardó.
+    """
+    static_device, _ = StaticDevice.objects.get_or_create(
+        user=request.user,
+        name="backup-codes",
+    )
+
+    if request.method == "POST":
+        # Confirmación del usuario; se redirige al dashboard.
+        return redirect("dashboard")
+
+    # Regenerar: eliminar tokens anteriores y crear 8 nuevos.
+    StaticToken.objects.filter(device=static_device).delete()
+    codes: list[str] = []
+    for _ in range(BACKUP_CODES_COUNT):
+        token = secrets.token_hex(BACKUP_CODE_BYTES)  # 10 chars
+        StaticToken.objects.create(device=static_device, token=token)
+        codes.append(token)
+
+    return render(request, "backup_codes.html", {"codes": codes})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. Login etapa 1
+# ─────────────────────────────────────────────────────────────────────────────
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def login_step1(request: HttpRequest) -> HttpResponse:
+    """Email + password. Si 2FA está activo, redirige a etapa 2; si no, login directo."""
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        form = LoginStep1Form(request.POST, request=request)
+        if form.is_valid():
+            user = form.user
+            if user.is_2fa_enabled and _user_has_confirmed_totp(user):
+                # Guardar ID en sesión y forzar etapa 2.
+                request.session[PENDING_2FA_KEY] = user.pk
+                # No llamar login() aún — el usuario NO está autenticado hasta superar TOTP.
+                return redirect("login_step2")
+            # Sin 2FA: login directo.
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            return redirect("dashboard")
+    else:
+        form = LoginStep1Form(request=request)
+
+    return render(request, "login_step1.html", {"form": form})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Login etapa 2
+# ─────────────────────────────────────────────────────────────────────────────
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def login_step2(request: HttpRequest) -> HttpResponse:
+    """Verifica token TOTP o backup code. Solo accesible tras superar etapa 1."""
+    user_id = request.session.get(PENDING_2FA_KEY)
+    if not user_id:
+        return redirect("login_step1")
+
+    try:
+        user = User.objects.get(pk=user_id, is_active=True)
+    except User.DoesNotExist:
+        request.session.pop(PENDING_2FA_KEY, None)
+        return redirect("login_step1")
+
+    if request.method == "POST":
+        form = LoginStep2Form(request.POST)
+        if form.is_valid():
+            token = form.cleaned_data["token"]
+            if _verify_2fa_token(user, token):
+                # Login real + limpieza de sesión + reset axes.
+                login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+                request.session.pop(PENDING_2FA_KEY, None)
+                return redirect("dashboard")
+            # Token inválido — registrar intento fallido para axes (vía signal).
+            form.add_error("token", "Código incorrecto.")
+    else:
+        form = LoginStep2Form()
+
+    return render(request, "login_step2.html", {"form": form, "email": user.email})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. Logout
+# ─────────────────────────────────────────────────────────────────────────────
+@require_http_methods(["POST"])
+@csrf_protect
+def logout_view(request: HttpRequest) -> HttpResponse:
+    logout(request)
+    return redirect("login_step1")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. Dashboard protegido por 2FA
+# ─────────────────────────────────────────────────────────────────────────────
+_DIAS_ES   = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+_MESES_ES  = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+              'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+_RECOMENDACIONES = [
+    "Tómate 10 minutos para respirar y desconectarte.",
+    "Haz una pausa activa: levántate, estírate y camina 5 minutos.",
+    "Bebe un vaso de agua ahora mismo. La hidratación mejora el ánimo.",
+    "Escribe tres cosas por las que estás agradecido hoy.",
+    "Escucha tu canción favorita y concéntrate solo en la música.",
+    "Sal a tomar aire fresco por 5 minutos.",
+    "Apaga las notificaciones por una hora y concéntrate en una sola tarea.",
+    "Practica la respiración 4-7-8: inhala 4s, mantén 7s, exhala 8s.",
+    "Habla con alguien de confianza sobre cómo te sientes.",
+    "Date un momento para hacer algo que disfrutes, aunque sea breve.",
+]
+
+
+@login_required(login_url="login_step1", redirect_field_name="next")
+def dashboard(request: HttpRequest) -> HttpResponse:
+    from calendario.views import _build_week_context, _get_dashboard_summary
+    hoy = timezone.localdate()
+    usuario_dominio = getattr(request.user, 'usuario_dominio', None)
+    calendario_semana = _build_week_context(hoy, usuario_dominio)
+    resumen = _get_dashboard_summary(hoy, usuario_dominio)
+
+    dia_es  = _DIAS_ES[hoy.weekday()]
+    mes_es  = _MESES_ES[hoy.month - 1]
+    semana  = hoy.isocalendar().week
+    fecha_fmt = f"{dia_es}, {hoy.day:02d} de {mes_es} — semana {semana}"
+
+    contexto = {
+        "active_section": "inicio",
+        "usuario": request.user,
+        "fecha_hoy_formateada": fecha_fmt,
+        "estado_hoy": resumen["estado_hoy"],
+        "riesgo": resumen["riesgo"],
+        "racha": resumen["racha"],
+        "sin_datos": resumen["sin_datos"],
+        "recomendacion": {"texto": random.choice(_RECOMENDACIONES)},
+        "calendario_semana": calendario_semana,
+    }
+    return render(request, "dashboard.html", contexto)
+
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 8. Vistas de secciones aún no fragmentadas
+# ─────────────────────────────────────────────────────────────────────────────
+# NOTA (reorganización modular):
+#   Las vistas `calendario`, `historial` y `recursos` se trasladaron a sus
+#   apps homónimas (calendario.views / historial.views / recursos.views).
+#   Aquí permanecen sólo `registro_diario` y `perfil_inicial`, pendientes de
+#   migrarse a `formulario/formulario_diario` y `formulario/formulario_inicial`.
+def _eval_inicial(user):
+    """Devuelve la EvaluacionInicial más reciente del usuario, o None."""
+    from core.models import EvaluacionInicial
+    dominio = getattr(user, "usuario_dominio", None)
+    if dominio is None:
+        return None
+    return (
+        EvaluacionInicial.objects
+        .filter(id_usuario=dominio)
+        .order_by("-id_eval")
+        .first()
+    )
+
+
+@login_required(login_url="login_step1")
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def perfil(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        form = PerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            # Sync campos de EvaluacionInicial
+            from core.models import EvaluacionInicial
+            dominio = getattr(request.user, "usuario_dominio", None)
+            if dominio:
+                campos: dict = {}
+                if form.cleaned_data.get("edad") is not None:
+                    campos["edad"] = form.cleaned_data["edad"]
+                if form.cleaned_data.get("situacion_trabajo"):
+                    campos["situacion_trabajo"] = form.cleaned_data["situacion_trabajo"]
+                if form.cleaned_data.get("estado_civil"):
+                    campos["estado_relacion"] = form.cleaned_data["estado_civil"]
+                if campos:
+                    EvaluacionInicial.objects.filter(id_usuario=dominio).update(**campos)
+            messages.success(request, "Perfil actualizado correctamente.")
+            return redirect("perfil")
+    else:
+        eval_ini = _eval_inicial(request.user)
+        # Extra fields (genero, situacion_trabajo) are not on CustomUser so
+        # Django's ModelForm won't override them with instance data — initial works.
+        # For edad: pre-populate from EvaluacionInicial if CustomUser.edad is empty.
+        initial: dict = {}
+        if eval_ini:
+            if eval_ini.situacion_trabajo:
+                initial["situacion_trabajo"] = eval_ini.situacion_trabajo
+            if request.user.edad is None and eval_ini.edad is not None:
+                initial["edad"] = eval_ini.edad
+            if not request.user.estado_civil and eval_ini.estado_relacion:
+                initial["estado_civil"] = eval_ini.estado_relacion
+        form = PerfilForm(instance=request.user, initial=initial)
+    return render(request, "perfil.html", {"active_section": "perfil", "form": form})
+
+
+@login_required(login_url="login_step1")
+def perfil_inicial(request: HttpRequest) -> HttpResponse:
+    return render(request, "perfil.html", {"active_section": "perfil"})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────────────────────────────────────
+def _build_qr_base64(payload: str) -> str:
+    """Genera PNG del QR codificado en base64 (data URI ready)."""
+    img = qrcode.make(payload)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def _user_has_confirmed_totp(user) -> bool:
+    """¿El usuario tiene al menos un TOTPDevice confirmado activo?"""
+    return TOTPDevice.objects.filter(user=user, confirmed=True).exists()
+
+
+def _verify_2fa_token(user, token: str) -> bool:
+    """
+    Intenta verificar `token` contra cualquier dispositivo confirmado.
+    Cubre TOTPDevice (6 dígitos) y StaticDevice (backup codes).
+    StaticDevice.verify_token consume el token (lo elimina) si es correcto.
+    """
+    from django_otp.plugins.otp_totp.models import TOTPDevice
+    from django_otp.plugins.otp_static.models import StaticDevice
+
+    print("\n" + "="*50)
+    print(f"[2FA DEBUG] Verificando token para usuario: {user.pk}")
+    print(f"[2FA DEBUG] Token recibido: '{token}' (longitud: {len(token)})")
+
+    totp_qs = TOTPDevice.objects.filter(user=user, confirmed=True)
+    static_qs = StaticDevice.objects.filter(user=user, confirmed=True)
+    print(f"[2FA DEBUG] Dispositivos TOTP confirmados: {totp_qs.count()}")
+    print(f"[2FA DEBUG] Dispositivos Static (backup) confirmados: {static_qs.count()}")
+
+    # Verificar TOTP
+    for device in totp_qs:
+        print(f"[2FA DEBUG] Probando TOTPDevice id={device.id} ...")
+        ok = device.verify_token(token)
+        print(f"[2FA DEBUG]   Resultado: {ok}")
+        if ok:
+            print("[2FA DEBUG] ✅ Token válido (TOTP). Autenticación exitosa.")
+            return True
+
+    # Verificar códigos de respaldo (static)
+    for device in static_qs:
+        print(f"[2FA DEBUG] Probando StaticDevice id={device.id} ...")
+        ok = device.verify_token(token)
+        print(f"[2FA DEBUG]   Resultado: {ok}")
+        if ok:
+            print("[2FA DEBUG] ✅ Token válido (código de respaldo). Autenticación exitosa.")
+            return True
+
+    print("[2FA DEBUG] ❌ Token inválido para todos los dispositivos.")
+    print("="*50 + "\n")
+    return False

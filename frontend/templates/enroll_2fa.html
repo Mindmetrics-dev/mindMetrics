@@ -1,0 +1,80 @@
+{% extends 'mindmetrics/auth_base.html' %}
+{% load static %}
+
+{% block title %}Configurar 2FA - MindMetrics{% endblock %}
+
+{% block auth_brand %}{% endblock %}
+
+{% block auth_content %}
+    <h1 class="auth-card__title">Configurar 2FA</h1>
+    <p class="auth-card__subtitle">
+        Escanea el código QR con <strong>Google Authenticator</strong>, <strong>Authy</strong>
+        o similar e introduce el código de 6 dígitos generado.
+    </p>
+
+    {# Bloque opcional de mensajes (por si la vista envía alguno) #}
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="alert alert--{{ msg.tags }}">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div style="display:flex; justify-content:center; margin:24px 0;">
+        {% if qr_image %}
+            <img src="data:image/png;base64,{{ qr_image }}"
+                 alt="Código QR para 2FA"
+                 width="220" height="220">
+        {% else %}
+            <div style="width:220px;height:220px;background:#f0f0f5;
+                        display:flex;align-items:center;justify-content:center;
+                        border-radius:8px;color:#888;text-align:center;padding:16px;">
+                Aquí se mostrará el<br>código QR
+            </div>
+        {% endif %}
+    </div>
+
+    {# Bloque para mostrar el secreto manualmente (lógica del Código 2) #}
+    {% if secret %}
+        <div class="qr-secret" style="text-align:center; margin:16px 0; padding:12px; background:var(--color-surface-2, #f8f9fa); border-radius:8px;">
+            <p class="qr-secret__label" style="margin:0 0 8px; font-size:0.9rem;">
+                ¿No puedes escanear? Introduce este secreto manualmente:
+            </p>
+            <code class="qr-secret__value" style="font-size:1.1rem; background:var(--color-code-bg, #eee); padding:6px 12px; border-radius:6px;">
+                {{ secret }}
+            </code>
+        </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="form-group__error" role="alert">
+                {{ form.non_field_errors|join:" " }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_token" class="form-group__label">Código de 6 dígitos</label>
+            <input type="text"
+                   id="id_token"
+                   name="token"
+                   inputmode="numeric"
+                   pattern="[0-9]*"
+                   maxlength="6"
+                   class="form-group__input"
+                   placeholder="123456"
+                   autocomplete="one-time-code"
+                   required>
+            {% if form.token.errors %}
+                <span class="form-group__error">{{ form.token.errors|join:" " }}</span>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top: var(--space-4);">
+            {# Opcional: si quieres mantener el icono como en otros formularios, descomenta la línea siguiente #}
+             <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon"> 
+            Activar 2FA
+        </button>
+    </form>
+{% endblock %}

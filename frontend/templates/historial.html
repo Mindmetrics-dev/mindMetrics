@@ -1,0 +1,93 @@
+{% extends 'mindmetrics/base.html' %}
+{% load static %}
+
+{% block title %}Historial - MindMetrics{% endblock %}
+
+{% block content %}
+<div class="historial-page">
+
+    <header class="historial-header">
+        <h1 class="historial-header__title">Historial de registros</h1>
+
+        <form method="get" action="{% url 'historial' %}" class="historial-header__filter">
+            <label for="id_dias" class="form-group__label">Mostrar últimos</label>
+            <select id="id_dias" name="dias" class="calendar__select" onchange="this.form.submit()">
+                <option value="7"   {% if ventana_dias == 7   %}selected{% endif %}>7 días</option>
+                <option value="14"  {% if ventana_dias == 14  %}selected{% endif %}>14 días</option>
+                <option value="30"  {% if ventana_dias == 30  %}selected{% endif %}>30 días</option>
+                <option value="90"  {% if ventana_dias == 90  %}selected{% endif %}>3 meses</option>
+                <option value="180" {% if ventana_dias == 180 %}selected{% endif %}>6 meses</option>
+                <option value="365" {% if ventana_dias == 365 %}selected{% endif %}>1 año</option>
+            </select>
+        </form>
+    </header>
+
+    {% if registros %}
+        <section class="grid grid--metrics-3" style="margin-bottom: var(--space-8);">
+            <article class="metric-card">
+                <h2 class="metric-card__label">Registros en ventana</h2>
+                <p class="metric-card__value metric-card__value--success">{{ resumen.total }}</p>
+                <p class="metric-card__hint">Últimos {{ ventana_dias }} días</p>
+            </article>
+            <article class="metric-card">
+                <h2 class="metric-card__label">Primer registro</h2>
+                <p class="metric-card__value">{{ resumen.primer_registro|date:"d/m/Y" }}</p>
+                <p class="metric-card__hint">En esta ventana</p>
+            </article>
+            <article class="metric-card">
+                <h2 class="metric-card__label">Último registro</h2>
+                <p class="metric-card__value">{{ resumen.ultimo_registro|date:"d/m/Y" }}</p>
+                <p class="metric-card__hint">Más reciente</p>
+            </article>
+        </section>
+
+        <section>
+            <p class="section-label">Detalle por día</p>
+            <div class="historial-table-wrap">
+                <table class="historial-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Emoción predominante</th>
+                            <th>Nivel de riesgo</th>
+                            <th>Hs. sueño</th>
+                            <th>Estrés laboral</th>
+                            <th>Estrés académico</th>
+                            <th>Estrés financiero</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in registros %}
+                        <tr>
+                            <td>{{ reg.fecha|date:"d/m/Y" }}</td>
+                            <td>{{ reg.emocion|capfirst }}</td>
+                            <td>
+                                <span class="badge badge--{{ reg.nivel_clase }}">
+                                    {{ reg.nivel_riesgo }}
+                                </span>
+                            </td>
+                            <td>{% if reg.hr_sueno is not None %}{{ reg.hr_sueno }}h{% else %}—{% endif %}</td>
+                            <td>{% if reg.estres_laboral is not None %}{{ reg.estres_laboral }}/10{% else %}—{% endif %}</td>
+                            <td>{% if reg.estres_academico is not None %}{{ reg.estres_academico }}/10{% else %}—{% endif %}</td>
+                            <td>{% if reg.estres_financiero is not None %}{{ reg.estres_financiero }}/10{% else %}—{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    {% else %}
+        <div class="historial-placeholder">
+            <p class="historial-placeholder__text">
+                No hay registros en los últimos {{ ventana_dias }} días.<br>
+                Completa tu registro diario para ver el historial aquí.
+            </p>
+            <a href="{% url 'registro_diario' %}" class="btn btn--primary" style="margin-top: var(--space-4);">
+                + Registrar hoy
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
