@@ -143,7 +143,7 @@ def registro_diario(request: HttpRequest) -> HttpResponse:
     if dominio and services._ya_registro_en_fecha(dominio, timezone.localdate()):
         messages.success(
             request,
-            "Ya completaste tu registro diario de hoy. Aquí puedes ver tu estado actual. "
+            "Ya completaste tu registro diario. Aquí puedes ver tu estado actual. "
             "O en historial verificar los datos registrados.",
         )
         return redirect("dashboard")
@@ -157,7 +157,7 @@ def registro_diario(request: HttpRequest) -> HttpResponse:
                     datos=form.cleaned_data,
                 )
             except services.YaRegistroHoy:
-                messages.warning(request, "Ya registraste tu diario hoy. Vuelve mañana para registrar otro.")
+                messages.warning(request, "Ya registraste tu registro diario. Vuelve mañana para registrar otro.")
                 return redirect("dashboard")
             except services.EvaluacionInicialFaltante:
                 messages.error(request, "Necesitas completar tu evaluación inicial antes de registrar el diario.")

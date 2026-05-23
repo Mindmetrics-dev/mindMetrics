@@ -185,3 +185,12 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     X_FRAME_OPTIONS = "DENY"
+
+# HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    'https://mindmetrics.cloud',
+    'https://www.mindmetrics.cloud',
+]
+
+# X-Forwarded-Proto que envía Nginx para saber si la sesión es segura (HTTPS)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
