@@ -97,7 +97,7 @@ DATABASES = {
         "NAME": config("DB_NAME", default="BD_MindMetrics"),
         "USER": config("DB_USER", default="postgres"),
         "PASSWORD": config("DB_PASSWORD", default="clave123"),
-        "HOST": config("DB_HOST", default="localhost"),
+        "HOST": config("DB_HOST", default="db"),
         "PORT": config("DB_PORT", default="5432"),
     }
 }
@@ -178,3 +178,12 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     X_FRAME_OPTIONS = "DENY"
+
+# HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    'https://mindmetrics.cloud',
+    'https://www.mindmetrics.cloud',
+]
+
+# X-Forwarded-Proto que envía Nginx para saber si la sesión es segura (HTTPS)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

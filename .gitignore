@@ -61,3 +61,13 @@ htmlcov/
 
 .claude/
 .git/
+# prod
+.env
+*.pem
+certbot/conf/live/
+certbot/conf/archive/
+__pycache__/
+*.pyc
+logs/
+certbot/
+nginx/certs/

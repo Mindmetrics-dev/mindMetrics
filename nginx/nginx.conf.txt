@@ -1,0 +1,55 @@
+# nginx/nginx.conf
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    # Redirigir todo el tráfico HTTP a HTTPS
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name _;
+        return 301 https://$host$request_uri;
+    }
+
+    # Servidor HTTPS principal
+    server {
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
+        server_name mindmetrics.cloud www.mindmetrics.cloud;
+
+        # Certificados SSL (Certbot los actualizará)
+        ssl_certificate     /etc/letsencrypt/live/mindmetrics.cloud/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/mindmetrics.cloud/privkey.pem;
+
+        # Configuración de seguridad SSL (recomendada)
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 1h;
+
+        # Proxy inverso hacia Django
+        location / {
+            proxy_pass http://web_ia:8000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_redirect off;
+        }
+
+        # Archivos estáticos (opcional, mejora rendimiento)
+        location /static/ {
+            alias /app/staticfiles/;
+            expires 30d;
+        }
+
+        location /media/ {
+            alias /app/media/;
+            expires 30d;
+        }
+    }
+}

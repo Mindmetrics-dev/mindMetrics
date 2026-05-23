@@ -1,93 +1,81 @@
-version: '3.8'
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# MindMetrics — docker-compose.yml
-# ═══════════════════════════════════════════════════════════════════════════════
-
 services:
-
-  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  # ── PostgreSQL ──────────────────────────────────────────────────────────
   db:
     image: postgres:15
     container_name: mindmetrics_db
     restart: always
-
-    env_file:
-      - backend/.env
-
     environment:
-      POSTGRES_DB: ${DB_NAME:-mi_plataforma}
+      POSTGRES_DB: ${DB_NAME:-BD_MindMetrics}
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-clave123}
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/01_domain_tables.sql:ro
-
+      - ./postgres/02_create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql
     networks:
       - mindmetrics_net
-
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 15
       start_period: 15s
 
-  # ── Django ──────────────────────────────────────────────────────────────────
+  # ── Django (App Web + IA) ──────────────────────────────────────────────
   web_ia:
     build:
       context: .
       dockerfile: docker/django/Dockerfile
-
     container_name: mindmetrics_web_ia
     restart: always
     working_dir: /app
-
-    command: >
-      bash -c "
-        echo '[startup] ── 1/4 Aplicando migraciones Django...' &&
-        python manage.py migrate --noinput &&
-
-        echo '[startup] ── 2/4 Creando/verificando tablas de dominio...' &&
-        python manage.py create_domain_tables \
-          --sql-path /app/postgres/02_create_tables.sql &&
-
-        echo '[startup] ── 3/4 Cargando Dataset.csv...' &&
-        python manage.py load_csv_normalized \
-          --path /app/postgres/Dataset.csv \
-          --batch-size 500 \
-          || echo '[startup] ADVERTENCIA: ETL omitido (ver logs/).' &&
-
-        echo '[startup] ── 4/4 Iniciando servidor Django...' &&
-        python manage.py runserver 0.0.0.0:8000
-      "
-
-    env_file:
-      - backend/.env
-
+    command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     environment:
-      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-preview-key-cambiar-en-produccion}
-      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
-      OTP_TOTP_ISSUER: ${OTP_TOTP_ISSUER:-MindMetrics}
-      AXES_FAILURE_LIMIT: ${AXES_FAILURE_LIMIT:-5}
-      AXES_COOLOFF_MINUTES: ${AXES_COOLOFF_MINUTES:-15}
-
+      DB_NAME: ${DB_NAME:-BD_MindMetrics}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-clave123}
+      DB_HOST: db
+      DB_PORT: 5432
     volumes:
       - .:/app
       - ./logs:/app/logs
       - ./reports:/app/reports
-
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     ports:
-      - "8000:8000"
-      - "443:443"
-
+      - "8000:8000"  
     depends_on:
       db:
         condition: service_healthy
-
     networks:
       - mindmetrics_net
+
+  # ── Nginx (Proxy inverso y SSL) ────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: mindmetrics_nginx
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot:/etc/letsencrypt:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web_ia
+    networks:
+      - mindmetrics_net
+
+  # ── Certbot (Renovación automática de SSL) ────────────────────────────
+  certbot:
+    image: certbot/certbot
+    container_name: mindmetrics_certbot
+    restart: unless-stopped
+    volumes:
+      - ./certbot:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done;'"
 
 networks:
   mindmetrics_net:
@@ -95,3 +83,6 @@ networks:
 
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:
+
