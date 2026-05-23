@@ -91,14 +91,14 @@ LINEAS_ATENCION: list[dict] = [
     },
     {
         "nombre": "Psicóloga Daniela Soto",
-        "telefono": "+57 301 4646247",
+        "telefono": "(+57) 301 4646247",
         "descripcion": "Psicoterapia presencial y remota",
         "horario": "",
     },
     {
         "nombre": "Casa Matria",
-        "telefono": "350 803 2031 (Diurno) / 311 612 0000 (24/7)",
-        "descripcion": "Atención a mujeres — Violencia de género",
+        "telefono": "(+57) 350 803 2031 (Diurno)\n(+57) 311 612 0000 (24/7)",
+        "descripcion": "Atención a mujeres - Violencia de género",
         "horario": "",
     },
 ]

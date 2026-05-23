@@ -6,11 +6,13 @@ Diseño:
   - LoginStep1Form: email + password (primera etapa).
   - LoginStep2Form: token TOTP o backup code (segunda etapa).
   - Enroll2FAForm: confirmación inicial del TOTPDevice.
+  - CustomPasswordResetForm: envío forzado de token criptográfico en formato HTML.
 """
 from __future__ import annotations
 
 from django import forms
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.forms import PasswordResetForm  # Importado para el reset
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -159,6 +161,37 @@ class LoginStep2Form(_TokenFormBase):
 
 class Enroll2FAForm(_TokenFormBase):
     """Confirmación inicial del TOTPDevice tras escanear el QR."""
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. Restablecimiento de Contraseña
+# ─────────────────────────────────────────────────────────────────────────────
+class CustomPasswordResetForm(PasswordResetForm):
+    """
+    Extiende el formulario nativo de Django para forzar la inyección
+    del parámetro html_email_template_name durante el envío por SMTP.
+    """
+
+    def send_mail(
+        self,
+        subject_template_name: str,
+        email_template_name: str,
+        context: dict,
+        from_email: str | None,
+        to_email: str,
+        html_email_template_name: str | None = None,
+    ) -> None:
+        # Forzamos al motor transaccional a usar la plantilla HTML estructurada
+        html_email_template_name = "password_reset_email.html"
+
+        super().send_mail(
+            subject_template_name=subject_template_name,
+            email_template_name=email_template_name,
+            context=context,
+            from_email=from_email,
+            to_email=to_email,
+            html_email_template_name=html_email_template_name,
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-BD_MindMetrics}
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-clave123}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/02_create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql

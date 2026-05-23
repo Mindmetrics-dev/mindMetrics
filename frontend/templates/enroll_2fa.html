@@ -8,8 +8,8 @@
 {% block auth_content %}
     <h1 class="auth-card__title">Configurar 2FA</h1>
     <p class="auth-card__subtitle">
-        Escanea el código QR con <strong>Google Authenticator</strong>, <strong>Authy</strong>
-        o similar e introduce el código de 6 dígitos generado.
+        Escanea el código QR con <strong>Google Authenticator</strong>, <strong>Authy</strong> 
+        o una app similar. Luego ingresa el código de 6 dígitos que aparece en la aplicación.
     </p>
 
     {# Bloque opcional de mensajes (por si la vista envía alguno) #}
@@ -37,9 +37,9 @@
     {% if secret %}
         <div class="qr-secret" style="text-align:center; margin:16px 0; padding:12px; background:var(--color-surface-2, #f8f9fa); border-radius:8px;">
             <p class="qr-secret__label" style="margin:0 0 8px; font-size:0.9rem;">
-                ¿No puedes escanear? Introduce este secreto manualmente:
+                ¿No puedes escanear el código QR? Introduce esta clave manualmente: 
             </p>
-            <code class="qr-secret__value" style="font-size:1.1rem; background:var(--color-code-bg, #eee); padding:6px 12px; border-radius:6px;">
+            <code class="qr-secret__value" style="font-size:1rem; font-family: monospace; background:var(--color-code-bg, #eee); padding:6px 12px; border-radius:6px; display:inline-block; max-width:100%; word-break:break-all; overflow-wrap:anywhere; letter-spacing:1px;">
                 {{ secret }}
             </code>
         </div>

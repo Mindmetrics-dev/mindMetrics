@@ -36,14 +36,14 @@
                 <span class="form-group__error">{{ form.password.errors|join:" " }}</span>
             {% endif %}
             
-            <div style="text-align: right; margin-top: var(--space-2);">
-                <a href="{% url 'password_reset' %}" class="forgot-password-link" style="font-size: 0.85rem; color: var(--color-primary); text-decoration: none;">
-                    ¿Olvidaste tu contraseña?
-                </a>
+            <div style="text-align: right; margin-top: var(--space-4);">
+            <a href="{% url 'password_reset' %}" class="auth-card__footer-link" style="font-size: 0.90rem;">
+            ¿Olvidaste tu contraseña?
+            </a>
             </div>
         </div>
 
-        <button type="submit" class="btn btn--primary btn--block" style="margin-top: var(--space-4);">
+        <button type="submit" class="btn btn--primary btn--block" style="margin-top: var(--space-3);">
             <img src="{% static 'img/logo.png' %}" alt="" class="btn__icon">
             Continuar
         </button>

@@ -18,13 +18,10 @@ db.sqlite3
 db.sqlite3-journal
 backend/staticfiles/
 backend/media/
-Backend/staticfiles/
-Backend/media/
 
 # ─── Secrets / Configuración local ────────────────────────────────────────────
 .env
 backend/.env
-Backend/.env
 *.pem
 *.key
 
@@ -59,15 +56,6 @@ htmlcov/
 .pytest_cache/
 .tox/
 
+# ─── Otros ────────────────────────────────────────────────────────────────────
 .claude/
-.git/
-# prod
-.env
-*.pem
-certbot/conf/live/
-certbot/conf/archive/
-__pycache__/
-*.pyc
-logs/
-certbot/
-nginx/certs/
+git status.txt

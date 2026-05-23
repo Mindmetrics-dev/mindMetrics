@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
+from usuarios.forms import CustomPasswordResetForm
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -19,7 +20,8 @@ urlpatterns = [
         auth_views.PasswordResetView.as_view(
             template_name="password_reset.html",
             email_template_name="password_reset_email.html",
-            subject_template_name="password_reset_subject.txt"
+            subject_template_name="password_reset_subject.txt",
+            form_class=CustomPasswordResetForm 
         ),
         name="password_reset"
     ),

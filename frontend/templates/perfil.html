@@ -6,13 +6,6 @@
 {% block content %}
 <div class="perfil-page">
 
-    {# ── Mensajes ──────────────────────────────────────────────────────────── #}
-    {% if messages %}
-        {% for msg in messages %}
-            <div class="perfil-alert perfil-alert--{{ msg.tags }}">{{ msg }}</div>
-        {% endfor %}
-    {% endif %}
-
     <form method="post" novalidate>
         {% csrf_token %}
 

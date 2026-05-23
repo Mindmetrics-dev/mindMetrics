@@ -1,7 +1,5 @@
 #!/bin/bash
-
 # nginx/init-letsencrypt.sh
-# Ejecutar UNA SOLA VEZ para obtener el certificado SSL inicial
 
 domains=(mindmetrics.cloud www.mindmetrics.cloud)  
 rsa_key_size=4096
@@ -10,7 +8,7 @@ email="mindmetricsinfra@hotmail.com"
 staging=0  
 
 if [ -d "$data_path" ]; then
-  read -p "⚠️ Ya existe una carpeta 'certbot'. ¿Borrar y continuar? (y/N) " -n 1 -r
+  read -p "Ya existe una carpeta 'certbot'. ¿Borrar y continuar? (y/N) " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     rm -rf "$data_path"
@@ -34,4 +32,4 @@ docker-compose run --rm --entrypoint "\
     --no-eff-email \
     -d ${domains[0]} -d ${domains[1]}" certbot
 
-echo "✅ Certificado obtenido. Ahora inicia los servicios: docker-compose up -d"
+echo "Certificado obtenido. Ahora inicia los servicios: docker-compose up -d"
