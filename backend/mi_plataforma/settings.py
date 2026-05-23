@@ -1,12 +1,7 @@
-"""
-Settings de MindMetrics.
-BD: PostgreSQL (configurable via .env).
-Auth: django-otp (TOTP + Static) + django-axes (rate limiting) + Argon2.
-"""
 from datetime import timedelta
 from pathlib import Path
-
 from decouple import config
+import os
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -97,7 +92,7 @@ DATABASES = {
         "NAME": config("DB_NAME", default="BD_MindMetrics"),
         "USER": config("DB_USER", default="postgres"),
         "PASSWORD": config("DB_PASSWORD", default="clave123"),
-        "HOST": config("DB_HOST", default="localhost"),
+        "HOST": config("DB_HOST", default="db"),
         "PORT": config("DB_PORT", default="5432"),
     }
 }
@@ -168,6 +163,18 @@ SESSION_COOKIE_AGE = 1800          # 30 min en segundos
 SESSION_SAVE_EVERY_REQUEST = True  # reinicia el contador con cada request
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # persiste aunque se cierre el tab
 
+# settings.py
+# En lugar del backend SMTP, le decimos que pinte los correos en la terminal
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_USER', default=None) 
+EMAIL_HOST_PASSWORD = config('EMAIL_PASS', default=None)
+
+# Dirección emisora oficial visible para el usuario caleño
+DEFAULT_FROM_EMAIL = f'Soporte MindMetrics <{EMAIL_HOST_USER}>'
 # ─── Seguridad (activar en producción cuando DEBUG=False) ─────────────────────
 if not DEBUG:
     SECURE_SSL_REDIRECT = True

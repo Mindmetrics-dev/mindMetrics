@@ -113,9 +113,9 @@ class Command(BaseCommand):
 
         if all_ok:
             self.stdout.write(self.style.SUCCESS(
-                '\n✔ Todas las tablas de dominio están presentes.'
+                '\nTodas las tablas de dominio están presentes.'
             ))
         else:
             self.stdout.write(self.style.ERROR(
-                '\n✘ Faltan tablas. Ejecuta: python manage.py create_domain_tables'
+                '\nFaltan tablas. Ejecuta: python manage.py create_domain_tables'
             ))

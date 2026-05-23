@@ -1632,6 +1632,17 @@ select {
     margin-left: var(--space-1, 0.25rem);
 }
 
+.forgot-password-link {
+    font-size: 0.85rem;
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.forgot-password-link:hover {
+    text-decoration: underline;
+    opacity: 0.9;
+}
 /* ── Metric card variantes ───────────────────────────────────────────────── */
 .metric-card--muted { opacity: 0.6; }
 .metric-card__value--muted { color: var(--color-text-secondary, #9ca3af); }
