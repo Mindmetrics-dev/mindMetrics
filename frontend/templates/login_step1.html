@@ -3,7 +3,6 @@
 
 {% block title %}Iniciar sesión - MindMetrics{% endblock %}
 
-
 {% block auth_content %}
     <h1 class="auth-card__brand-title">Mind<span>Metrics</span></h1>
     
@@ -30,12 +29,18 @@
             {% endif %}
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="position: relative;">
             <label for="{{ form.password.id_for_label }}" class="form-group__label">Contraseña</label>
             {{ form.password }}
             {% if form.password.errors %}
                 <span class="form-group__error">{{ form.password.errors|join:" " }}</span>
             {% endif %}
+            
+            <div style="text-align: right; margin-top: var(--space-2);">
+                <a href="{% url 'password_reset' %}" class="forgot-password-link" style="font-size: 0.85rem; color: var(--color-primary); text-decoration: none;">
+                    ¿Olvidaste tu contraseña?
+                </a>
+            </div>
         </div>
 
         <button type="submit" class="btn btn--primary btn--block" style="margin-top: var(--space-4);">
