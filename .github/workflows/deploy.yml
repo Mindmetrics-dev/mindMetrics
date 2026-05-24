@@ -1,43 +1,47 @@
-name: Despliegue MindMetrics en Producción
+name: Test Conexión SSH a AWS
 
 on:
-  push:
-    branches:
-      - main  
+  workflow_dispatch:  # Esto permite ejecutarlo manualmente desde GitHub
 
 jobs:
-  deploy:
-    name: Desplegar en AWS
+  test-ssh:
+    name: Probar conexión SSH
     runs-on: ubuntu-latest
 
     steps:
-      - name: Obtener el código del repositorio
-        uses: actions/checkout@v4
-
-      - name: Ejecutar comandos de despliegue vía SSH
+      - name: Test de conexión SSH con debug
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+          debug: true  # Modo debug para ver detalles
           script: |
-            echo "Conectado al servidor de producción..."
-            
-            # 1. Entrar a la carpeta del proyecto en el servidor
-            cd ~/mindMetrics
-            
-            # 2. Descargar los últimos cambios limpios desde la rama protegida
-            git pull origin main
-            
-            # 3. Reconstruir los contenedores de Docker en caliente (sin tirar la DB)
-            echo "Reconstruyendo contenedores de Docker..."
-            docker compose up -d --build web_ia
-            
-            # 4. Ejecutar migraciones automáticas por si cambiaron modelos
-            docker compose exec -T web_ia python manage.py migrate --noinput
-            
-            # 5. Recolectar archivos estáticos para WhiteNoise
-            docker compose exec -T web_ia python manage.py collectstatic --noinput
-            
-            echo "¡Despliegue finalizado con éxito en producción!"
+            echo "==================================="
+            echo "CONEXIÓN SSH ESTABLECIDA CON ÉXITO"
+            echo "==================================="
+            echo ""
+            echo "=== INFORMACIÓN DEL SERVIDOR ==="
+            echo "Hostname: $(hostname)"
+            echo "Usuario actual: $(whoami)"
+            echo "Directorio actual: $(pwd)"
+            echo "Fecha y hora: $(date)"
+            echo "Sistema operativo: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2)"
+            echo ""
+            echo "=== VERIFICACIÓN DE COMANDOS ==="
+            echo "Git: $(git --version 2>/dev/null || echo 'Git no instalado')"
+            echo "Docker: $(docker --version 2>/dev/null || echo ' Docker no instalado')"
+            echo "Docker Compose: $(docker compose version 2>/dev/null || echo ' Docker Compose no instalado')"
+            echo ""
+            echo "=== DIRECTORIO DEL PROYECTO ==="
+            if [ -d ~/mindMetrics ]; then
+              echo " Directorio ~/mindMetrics existe"
+              ls -la ~/mindMetrics | head -5
+            else
+              echo " Directorio ~/mindMetrics NO existe"
+            fi
+            echo ""
+            echo "==================================="
+            echo "🔍 REVISAR LOGS ARRIBA PARA VER ERRORES"
+            echo "==================================="
