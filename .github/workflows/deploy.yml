@@ -1,0 +1,43 @@
+name: Despliegue MindMetrics en Producción
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  deploy:
+    name: Desplegar en AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtener el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Ejecutar comandos de despliegue vía SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            echo "Conectado al servidor de producción..."
+            
+            # 1. Entrar a la carpeta del proyecto en el servidor
+            cd ~/mindMetrics
+            
+            # 2. Descargar los últimos cambios limpios desde la rama protegida
+            git pull origin main
+            
+            # 3. Reconstruir los contenedores de Docker en caliente (sin tirar la DB)
+            echo "Reconstruyendo contenedores de Docker..."
+            docker compose up -d --build web_ia
+            
+            # 4. Ejecutar migraciones automáticas por si cambiaron modelos
+            docker compose exec -T web_ia python manage.py migrate --noinput
+            
+            # 5. Recolectar archivos estáticos para WhiteNoise
+            docker compose exec -T web_ia python manage.py collectstatic --noinput
+            
+            echo "¡Despliegue finalizado con éxito en producción!"
